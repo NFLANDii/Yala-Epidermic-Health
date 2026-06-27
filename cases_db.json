@@ -1,0 +1,308 @@
+[
+  {
+    "id": "case_001",
+    "gps": {
+      "lat": 6.5412,
+      "lng": 101.2825
+    },
+    "personalInfo": {
+      "name": "Somchai Jaidee",
+      "age": 45,
+      "gender": "Male",
+      "phone": "081-234-5678",
+      "status": "Quarantined"
+    },
+    "clinicalInfo": {
+      "symptoms": [
+        "High fever",
+        "Headache",
+        "Severe joint pain",
+        "Skin rash"
+      ],
+      "days": 4,
+      "contactHistory": "Visited Sateng park near standing water breeding ground."
+    },
+    "disease": "Dengue Fever",
+    "severity": "high",
+    "status": "Accepted",
+    "createdAt": "2026-06-25T05:03:11.493Z",
+    "areaName": "Sateng Center",
+    "priority": "moderate",
+    "scenario": "Normal"
+  },
+  {
+    "id": "case_002",
+    "gps": {
+      "lat": 6.528,
+      "lng": 101.299
+    },
+    "personalInfo": {
+      "name": "Aminah Sama",
+      "age": 28,
+      "gender": "Female",
+      "phone": "089-876-5432",
+      "status": "Hospitalized"
+    },
+    "clinicalInfo": {
+      "symptoms": [
+        "Dry cough",
+        "Loss of smell",
+        "Fatigue",
+        "Fever"
+      ],
+      "days": 3,
+      "contactHistory": "Close contact with a traveler returning from Bangkok."
+    },
+    "disease": "COVID-19",
+    "severity": "medium",
+    "status": "Waiting",
+    "createdAt": "2026-06-24T05:03:11.498Z",
+    "areaName": "Sateng Nok",
+    "priority": "moderate",
+    "scenario": "Normal"
+  },
+  {
+    "id": "case_003",
+    "gps": {
+      "lat": 6.551,
+      "lng": 101.268
+    },
+    "personalInfo": {
+      "name": "Peera Sawat",
+      "age": 5,
+      "gender": "Male",
+      "phone": "082-111-2222",
+      "status": "Self-Isolating"
+    },
+    "clinicalInfo": {
+      "symptoms": [
+        "Mouth sores",
+        "Skin rash on hands & feet",
+        "Mild fever"
+      ],
+      "days": 2,
+      "contactHistory": "Playmate at local kindergarten diagnosed with similar blisters."
+    },
+    "disease": "Hand, Foot, and Mouth Disease",
+    "severity": "low",
+    "status": "New",
+    "createdAt": "2026-06-27T05:03:11.498Z",
+    "areaName": "Tha Sap",
+    "priority": "low",
+    "scenario": "Normal"
+  },
+  {
+    "id": "case_004",
+    "gps": {
+      "lat": 6.545,
+      "lng": 101.284
+    },
+    "personalInfo": {
+      "name": "Fatimah Lateh",
+      "age": 62,
+      "gender": "Female",
+      "phone": "085-333-4444",
+      "status": "At Home"
+    },
+    "clinicalInfo": {
+      "symptoms": [
+        "Sore throat",
+        "Severe muscle aches",
+        "Chills",
+        "High fever"
+      ],
+      "days": 7,
+      "contactHistory": "Visited crowded fresh market in Sateng Center during flu season."
+    },
+    "disease": "Influenza",
+    "severity": "low",
+    "status": "Completed",
+    "createdAt": "2026-06-22T05:03:11.498Z",
+    "areaName": "Sateng Center",
+    "priority": "low",
+    "scenario": "Normal"
+  },
+  {
+    "id": "case_005",
+    "gps": {
+      "lat": 6.525,
+      "lng": 101.292
+    },
+    "personalInfo": {
+      "name": "Ibrahim Dolah",
+      "age": 34,
+      "gender": "Male",
+      "phone": "086-444-5555",
+      "status": "Quarantined"
+    },
+    "clinicalInfo": {
+      "symptoms": [
+        "Severe back pain",
+        "Nausea",
+        "Fever",
+        "Eye orbital pain"
+      ],
+      "days": 5,
+      "contactHistory": "Lives near construction site with open containers and heavy mosquitoes."
+    },
+    "disease": "Dengue Fever",
+    "severity": "high",
+    "status": "New",
+    "createdAt": "2026-06-27T05:03:11.498Z",
+    "areaName": "Sateng Nok",
+    "priority": "moderate",
+    "scenario": "Normal"
+  },
+  {
+    "id": "case_006",
+    "gps": {
+      "lat": 6.548,
+      "lng": 101.272
+    },
+    "personalInfo": {
+      "name": "Kanya Raksa",
+      "age": 12,
+      "gender": "Female",
+      "phone": "087-555-6666",
+      "status": "At Home"
+    },
+    "clinicalInfo": {
+      "symptoms": [
+        "Fever",
+        "Mild headache"
+      ],
+      "days": 1,
+      "contactHistory": "Classmate reported COVID-19 positive."
+    },
+    "disease": "COVID-19",
+    "severity": "medium",
+    "status": "Completed",
+    "createdAt": "2026-06-17T05:03:11.498Z",
+    "areaName": "Tha Sap",
+    "priority": "low",
+    "scenario": "Normal"
+  },
+  {
+    "id": "case_007",
+    "gps": {
+      "lat": 6.549,
+      "lng": 101.265
+    },
+    "personalInfo": {
+      "name": "Adisak Noonui",
+      "age": 38,
+      "gender": "Male",
+      "phone": "081-555-0199",
+      "status": "Hospitalized"
+    },
+    "clinicalInfo": {
+      "symptoms": [
+        "High fever",
+        "Severe muscle pain in calves",
+        "Red eyes",
+        "Jaundice"
+      ],
+      "days": 5,
+      "contactHistory": "Walked barefoot in stagnant floodwaters in Tha Sap lowlands near livestock farms."
+    },
+    "disease": "Leptospirosis",
+    "severity": "high",
+    "status": "Accepted",
+    "createdAt": "2026-06-26T05:03:11.498Z",
+    "areaName": "Tha Sap",
+    "priority": "critical",
+    "scenario": "Flood"
+  },
+  {
+    "id": "case_008",
+    "gps": {
+      "lat": 6.5385,
+      "lng": 101.2882
+    },
+    "personalInfo": {
+      "name": "Ruslan Masae",
+      "age": 12,
+      "gender": "Male",
+      "phone": "084-222-3434",
+      "status": "At Home"
+    },
+    "clinicalInfo": {
+      "symptoms": [
+        "Watery diarrhea",
+        "Abdominal cramps",
+        "Nausea",
+        "Dehydration"
+      ],
+      "days": 2,
+      "contactHistory": "Drank untreated water from temporary local wells during water supply disruption."
+    },
+    "disease": "Diarrhea",
+    "severity": "medium",
+    "status": "New",
+    "createdAt": "2026-06-27T05:03:11.498Z",
+    "areaName": "Sateng Center",
+    "priority": "moderate",
+    "scenario": "Flood"
+  },
+  {
+    "id": "case_009",
+    "gps": {
+      "lat": 6.5305,
+      "lng": 101.2954
+    },
+    "personalInfo": {
+      "name": "Mariyam Lateh",
+      "age": 55,
+      "gender": "Female",
+      "phone": "086-777-8899",
+      "status": "Self-Isolating"
+    },
+    "clinicalInfo": {
+      "symptoms": [
+        "Itching",
+        "Redness and peeling between toes",
+        "Pus-filled blisters"
+      ],
+      "days": 6,
+      "contactHistory": "Prolonged wading in stagnant mud and standing wastewater around her house in Sateng Nok."
+    },
+    "disease": "Skin Infection",
+    "severity": "low",
+    "status": "New",
+    "createdAt": "2026-06-27T05:03:11.498Z",
+    "areaName": "Sateng Nok",
+    "priority": "low",
+    "scenario": "Flood"
+  },
+  {
+    "id": "case_010",
+    "gps": {
+      "lat": 6.5445,
+      "lng": 101.2612
+    },
+    "personalInfo": {
+      "name": "Kamilah Waesama",
+      "age": 42,
+      "gender": "Female",
+      "phone": "089-999-0011",
+      "status": "Hospitalized"
+    },
+    "clinicalInfo": {
+      "symptoms": [
+        "Severe watery diarrhea resembling rice-water",
+        "Rapid heart rate",
+        "Severe vomiting",
+        "Muscle cramps"
+      ],
+      "days": 3,
+      "contactHistory": "Consumed raw seafood washed in contaminated flood water near the canal."
+    },
+    "disease": "Cholera",
+    "severity": "high",
+    "status": "Waiting",
+    "createdAt": "2026-06-26T17:03:11.498Z",
+    "areaName": "Tha Sap",
+    "priority": "critical",
+    "scenario": "Flood"
+  }
+]

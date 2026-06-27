@@ -1,0 +1,6 @@
+{
+  "name": "Yala Epidemic Health",
+  "description": "An epidemic monitoring website for Yala Municipality featuring real-time risk zone maps, case management for officials, and prevention guidelines.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
