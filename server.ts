@@ -10,6 +10,7 @@ import { createServer as createViteServer } from 'vite';
 
 // Load types for local handling
 import { Case, CaseStatus, SeverityLevel, PriorityLevel, ScenarioMode } from './src/types.js';
+import { GoogleGenAI } from '@google/genai';
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -18,6 +19,116 @@ const DB_FILE = path.join(process.cwd(), 'cases_db.json');
 // LINE Config from env
 const LINE_CHANNEL_ACCESS_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN || '';
 const LINE_CHANNEL_SECRET = process.env.LINE_CHANNEL_SECRET || '';
+
+// ─── Gemini AI Client Initialization ─────────────────────────────────────
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
+const ai = GEMINI_API_KEY && GEMINI_API_KEY !== 'MY_GEMINI_API_KEY'
+  ? new GoogleGenAI({ apiKey: GEMINI_API_KEY })
+  : null;
+
+interface AIClassification {
+  disease: string;
+  severity: SeverityLevel;
+  priority: PriorityLevel;
+  scenario: ScenarioMode;
+  analysis: string;
+}
+
+async function classifyCaseWithAI(
+  symptoms: string[],
+  contactHistory: string,
+  age: number
+): Promise<AIClassification | null> {
+  if (!ai) {
+    console.warn('[Gemini AI] GEMINI_API_KEY not set. Using rule-based fallback.');
+    return null;
+  }
+
+  try {
+    const prompt = `You are an AI Epidemiologist assistant for Yala City Municipality, Thailand.
+Analyze the following patient clinical symptoms and contact history:
+- Age: ${age} years old
+- Symptoms: ${symptoms.join(', ')}
+- Contact History: ${contactHistory}
+
+Determine the following:
+1. Disease classification: Choose from 'Dengue Fever' (ไข้เลือดออก), 'Leptospirosis' (ฉี่หนู), 'COVID-19' (โควิด-19), 'Influenza' (ไข้หวัดใหญ่), 'Diarrhea' (อุจจาระร่วง), 'Skin Infection' (ติดเชื้อผิวหนัง), 'Cholera' (อหิวาตกโรค), 'Hand, Foot, and Mouth Disease' (มือเท้าปาก), or 'Unknown'.
+2. Severity Level: 'high' (for Dengue, Leptospirosis, Cholera), 'medium' (for COVID-19, Diarrhea), or 'low' (for Influenza, Skin Infection, Hand-Foot-Mouth, or mild cases).
+3. Priority Level: 'critical' (high severity, needs immediate intervention), 'moderate' (medium severity, needs monitoring), or 'low' (low severity, outpatient care).
+4. Scenario Mode: 'Flood' (if symptoms/contact match Leptospirosis, Diarrhea, Skin Infection, Cholera during wading in floodwater or post-flood contamination) or 'Normal' (all other typical seasonal outbreaks).
+5. Analysis: A brief 1-2 sentence medical explanation in Thai explaining why you classified this disease and severity.
+
+Return the result as a JSON object matching the requested schema.`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: 'OBJECT',
+          properties: {
+            disease: { type: 'STRING' },
+            severity: { 
+              type: 'STRING', 
+              enum: ['high', 'medium', 'low'] 
+            },
+            priority: { 
+              type: 'STRING', 
+              enum: ['critical', 'moderate', 'low'] 
+            },
+            scenario: { 
+              type: 'STRING', 
+              enum: ['Normal', 'Flood'] 
+            },
+            analysis: { type: 'STRING' }
+          },
+          required: ['disease', 'severity', 'priority', 'scenario', 'analysis']
+        }
+      }
+    });
+
+    if (response.text) {
+      const parsed = JSON.parse(response.text) as AIClassification;
+      console.log('[Gemini AI] Case classified successfully:', parsed);
+      return parsed;
+    }
+  } catch (err) {
+    console.error('[Gemini AI] Error during case classification:', err);
+  }
+  return null;
+}
+
+
+async function getAIConsultation(userQuery: string): Promise<string> {
+  if (!ai) {
+    return 'พิมพ์ "รายงาน" เพื่อเริ่มแจ้งอาการป่วยแก่เจ้าหน้าที่สาธารณสุขยะลาครับ 🏥';
+  }
+
+  try {
+    const prompt = `You are the "หมอเสมือนจริง เทศบาลนครยะลา" (Yala Municipality Virtual Doctor).
+A citizen of Yala is asking a question or talking to you:
+"${userQuery}"
+
+Provide a friendly, helpful response in Thai (with appropriate emojis) giving public health advice or guidance.
+- Answer their question concisely based on standard medical guidelines for tropical/seasonal diseases (like Dengue, Leptospirosis, Diarrhea, Influenza, COVID-19).
+- If they describe symptoms of being sick, recommend that they type the command "รายงาน" (or "report") to officially submit their case to the Yala Public Health department so officers can follow up.
+- Maintain a warm, reassuring, and professional tone. Keep it concise.`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt
+    });
+
+    if (response.text) {
+      return response.text.trim();
+    }
+  } catch (err) {
+    console.error('[Gemini AI] Error during AI consultation:', err);
+  }
+  return 'ขออภัยครับ ระบบวิเคราะห์คำแนะนำของหมอชั่วคราวติดขัด สามารถพิมพ์ "รายงาน" เพื่อแจ้งประวัติอาการป่วยโดยตรงได้ครับ 🏥';
+}
+
 
 // ─── LINE Session State Machine ───────────────────────────────────────────
 type LineStep =
@@ -398,6 +509,77 @@ function broadcast(type: string, data: any) {
 // Ensure the DB file is initialized on start
 loadCases();
 
+// GET /api/ai/outbreak-report - Generates outbreak analysis using Gemini AI
+app.get('/api/ai/outbreak-report', async (req, res) => {
+  const cases = loadCases();
+  
+  if (!ai) {
+    // Mock report fallback
+    const reportText = `### 📊 รายงานวิเคราะห์โรคระบาดนครยะลาโดย AI (จำลอง)
+
+*หมายเหตุ: จำลองรายงานเนื่องจากไม่ได้ตั้งค่า GEMINI_API_KEY*
+
+#### 1. สถานการณ์ปัจจุบัน
+จากการวิเคราะห์คลังข้อมูลเคสระบาดวิทยา เทศบาลนครยะลา พบสถิติผู้ป่วยที่บันทึกรวม **${cases.length} ราย**
+- **สภาวะปกติ (Normal Scenario):** พบเคส **โรคไข้เลือดออก (Dengue Fever)** เป็นพาหะระบาดหลักในเขต *สะเตง Center* และ *สะเตงนอก*
+- **สภาวะอุทกภัย (Flood Scenario):** พบประวัติการรายงานโรคกลุ่มภัยพิบัติน้ำท่วม ได้แก่ **โรคฉี่หนู (Leptospirosis)** และ **โรคอุจจาระร่วงเฉียบพลัน (Diarrhea)** ในเขตพื้นที่ลุ่มน้ำท่วมขัง *ท่าสาป*
+
+#### 2. แนะนำมาตรการควบคุมโรคและจัดการเร่งด่วนสำหรับเทศบาล
+- เร่งฉีดพ่นละอองสารเคมีกำจัดแหล่งเพาะพันธุ์ยุงลายในรัศมี 35 เมตรรอบพิกัดระบาดสะเตงกลาง
+- จัดแจกเครื่องกรองและสารคลอรีนในระบบประปาตำบลท่าสาปและสะเตงนอก เพื่อป้องกันอุจจาระร่วงปนเปื้อนช่วงอุทกภัย
+- ประชาสัมพันธ์ให้ประชาชนสวมใส่รองเท้าบูททุกครั้งเมื่อเดินย่ำน้ำโคลนขัง`;
+    return res.json({ report: reportText });
+  }
+
+  try {
+    // Prepare data summary
+    const diseaseCounts: Record<string, number> = {};
+    const areaCounts: Record<string, number> = {};
+    let highRiskCount = 0;
+    
+    cases.forEach(c => {
+      diseaseCounts[c.disease] = (diseaseCounts[c.disease] || 0) + 1;
+      areaCounts[c.areaName] = (areaCounts[c.areaName] || 0) + 1;
+      if (c.severity === 'high') highRiskCount++;
+    });
+
+    const dataSummary = `
+Total Cases: ${cases.length}
+High Severity Cases: ${highRiskCount}
+Disease distribution: ${JSON.stringify(diseaseCounts)}
+Area distribution: ${JSON.stringify(areaCounts)}
+Recent cases ledger (anonymized):
+${cases.slice(-10).map(c => `- ${c.createdAt.substring(0,10)}: ${c.disease} in ${c.areaName} (Severity: ${c.severity}, Scenario: ${c.scenario})`).join('\n')}
+`;
+
+    const prompt = `You are a Senior Epidemiologist and Public Health Advisor for Yala City Municipality, Thailand.
+Using the following anonymized municipal outbreak statistics:
+${dataSummary}
+
+Write a comprehensive, professional epidemiological outbreak report (รายงานวิเคราะห์และประเมินสถานการณ์ระบาดวิทยา) in Thai.
+The report should include:
+1. **บทสรุปสำหรับผู้บริหาร (Executive Summary)**: Overview of the current active outbreaks and risk indicators in Yala.
+2. **การกระจายเชิงพื้นที่และกลุ่มโรค (Spatial & Disease Distribution)**: Highlight hotspots (Sateng Center, Sateng Nok, Tha Sap) and flood-related vs normal-season diseases.
+3. **การวิเคราะห์ระดับความเสี่ยง (Risk Assessment)**: Assessment of high-severity and critical-priority cases.
+4. **มาตรการและข้อเสนอแนะควบคุมโรค (Recommended Interventions)**: Specific actionable advice for the Yala municipality public health officers, such as fogging schedules, boot distribution in flood areas, or public communications.
+
+Format the output strictly as clean Markdown. Do not include raw JSON or codeblocks wrapping the markdown. Keep the tone authoritative, helpful, and highly detailed.`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: prompt
+    });
+
+    if (response.text) {
+      return res.json({ report: response.text });
+    }
+  } catch (err) {
+    console.error('[Gemini AI] Error generating outbreak report:', err);
+  }
+  
+  return res.status(500).json({ error: 'Failed to generate outbreak report' });
+});
+
 // Realtime Server-Sent Events Endpoint
 app.get('/api/realtime', (req, res) => {
   res.writeHead(200, {
@@ -423,7 +605,7 @@ app.get('/api/realtime', (req, res) => {
 // Authentication Endpoint
 app.post('/api/login', (req, res) => {
   const { email, password } = req.body;
-  
+
   if (email === 'naeef.benyakal@gmail.com' && password === 'NFLANDii403190') {
     return res.json({
       success: true,
@@ -445,7 +627,7 @@ app.post('/api/login', (req, res) => {
 
 // LINE Chatbot Ingestion Point
 // POST /api/cases
-app.post('/api/cases', (req, res) => {
+app.post('/api/cases', async (req, res) => {
   const payload = req.body;
 
   // Basic validation
@@ -460,32 +642,50 @@ app.post('/api/cases', (req, res) => {
   let priority: PriorityLevel = 'low';
   let scenario: ScenarioMode = 'Normal';
 
-  const diseaseNormalized = (payload.disease || '').toLowerCase();
-  
-  // Classify Scenario
-  if (
-    diseaseNormalized.includes('leptospirosis') || diseaseNormalized.includes('ฉี่หนู') ||
-    diseaseNormalized.includes('diarrhea') || diseaseNormalized.includes('ท้องร่วง') || diseaseNormalized.includes('อุจจาระ') ||
-    diseaseNormalized.includes('skin') || diseaseNormalized.includes('ผิวหนัง') || diseaseNormalized.includes('น้ำกัดเท้า') ||
-    diseaseNormalized.includes('cholera') || diseaseNormalized.includes('อหิวา')
-  ) {
-    scenario = 'Flood';
-  }
+  const symptoms = Array.isArray(payload.clinicalInfo?.symptoms)
+    ? payload.clinicalInfo.symptoms
+    : [payload.clinicalInfo?.symptoms || 'Fever', 'Fatigue'];
+  const contactHistory = payload.clinicalInfo?.contactHistory || 'No known contact history reported.';
+  const age = payload.personalInfo?.age ? parseInt(payload.personalInfo.age) : 30;
 
-  // Determine severity & priority
-  if (
-    diseaseNormalized.includes('dengue') || diseaseNormalized.includes('ไข้เลือดออก') ||
-    diseaseNormalized.includes('leptospirosis') || diseaseNormalized.includes('ฉี่หนู') ||
-    diseaseNormalized.includes('cholera') || diseaseNormalized.includes('อหิวา')
-  ) {
-    severity = 'high';
-    priority = 'critical';
-  } else if (
-    diseaseNormalized.includes('covid') || diseaseNormalized.includes('โควิด') ||
-    diseaseNormalized.includes('diarrhea') || diseaseNormalized.includes('ท้องร่วง')
-  ) {
-    severity = 'medium';
-    priority = 'moderate';
+  // Try AI Classification first
+  const aiClass = await classifyCaseWithAI(symptoms, contactHistory, age);
+  if (aiClass) {
+    severity = aiClass.severity;
+    priority = aiClass.priority;
+    scenario = aiClass.scenario;
+    if (aiClass.disease && aiClass.disease !== 'Unknown') {
+      payload.disease = aiClass.disease;
+    }
+  } else {
+    // Rule-based fallback classification
+    const diseaseNormalized = (payload.disease || '').toLowerCase();
+
+    // Classify Scenario
+    if (
+      diseaseNormalized.includes('leptospirosis') || diseaseNormalized.includes('ฉี่หนู') ||
+      diseaseNormalized.includes('diarrhea') || diseaseNormalized.includes('ท้องร่วง') || diseaseNormalized.includes('อุจจาระ') ||
+      diseaseNormalized.includes('skin') || diseaseNormalized.includes('ผิวหนัง') || diseaseNormalized.includes('น้ำกัดเท้า') ||
+      diseaseNormalized.includes('cholera') || diseaseNormalized.includes('อหิวา')
+    ) {
+      scenario = 'Flood';
+    }
+
+    // Determine severity & priority
+    if (
+      diseaseNormalized.includes('dengue') || diseaseNormalized.includes('ไข้เลือดออก') ||
+      diseaseNormalized.includes('leptospirosis') || diseaseNormalized.includes('ฉี่หนู') ||
+      diseaseNormalized.includes('cholera') || diseaseNormalized.includes('อหิวา')
+    ) {
+      severity = 'high';
+      priority = 'critical';
+    } else if (
+      diseaseNormalized.includes('covid') || diseaseNormalized.includes('โควิด') ||
+      diseaseNormalized.includes('diarrhea') || diseaseNormalized.includes('ท้องร่วง')
+    ) {
+      severity = 'medium';
+      priority = 'moderate';
+    }
   }
 
   // Override if explicitly supplied
@@ -519,8 +719,8 @@ app.post('/api/cases', (req, res) => {
       demands: payload.personalInfo?.demands || 'ไม่มี'
     },
     clinicalInfo: {
-      symptoms: Array.isArray(payload.clinicalInfo?.symptoms) 
-        ? payload.clinicalInfo.symptoms 
+      symptoms: Array.isArray(payload.clinicalInfo?.symptoms)
+        ? payload.clinicalInfo.symptoms
         : [payload.clinicalInfo?.symptoms || 'Fever', 'Fatigue'],
       days: payload.clinicalInfo?.days ? parseInt(payload.clinicalInfo.days) : Math.floor(Math.random() * 5) + 1,
       contactHistory: payload.clinicalInfo?.contactHistory || 'No known contact history reported.'
@@ -551,7 +751,7 @@ app.post('/api/cases', (req, res) => {
 app.get('/api/cases', (req, res) => {
   const authHeader = req.headers.authorization || '';
   const isOfficial = authHeader === 'Bearer mock-jwt-token-yala-epidemic-sec' || req.query.role === 'official';
-  
+
   const cases = loadCases();
 
   if (isOfficial) {
@@ -595,7 +795,7 @@ app.get('/api/cases', (req, res) => {
 app.put('/api/cases/:id', (req, res) => {
   const { id } = req.params;
   const { status, disease, priority, severity } = req.body;
-  
+
   const authHeader = req.headers.authorization || '';
   const isOfficial = authHeader === 'Bearer mock-jwt-token-yala-epidemic-sec';
 
@@ -624,7 +824,7 @@ app.put('/api/cases/:id', (req, res) => {
     cases[caseIndex].disease = disease;
     // Auto-update scenario, priority, and severity based on new disease if not explicitly overridden
     const diseaseNormalized = disease.toLowerCase();
-    
+
     let targetScenario: ScenarioMode = 'Normal';
     if (
       diseaseNormalized.includes('leptospirosis') || diseaseNormalized.includes('ฉี่หนู') ||
@@ -748,8 +948,9 @@ app.post('/api/line/webhook', express.raw({ type: '*/*' }), async (req, res) => 
           ),
         ]);
       } else {
+        const aiResponse = await getAIConsultation(text);
         await lineReply(replyToken, [
-          lineText('พิมพ์ "รายงาน" เพื่อเริ่มแจ้งอาการป่วยครับ 🏥'),
+          lineText(aiResponse),
         ]);
       }
       continue;

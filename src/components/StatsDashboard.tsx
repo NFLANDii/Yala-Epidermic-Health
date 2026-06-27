@@ -16,6 +16,10 @@ interface StatsDashboardProps {
   onCustomStartDateChange: (date: string) => void;
   customEndDate: string;
   onCustomEndDateChange: (date: string) => void;
+  aiReport?: string;
+  aiReportLoading?: boolean;
+  aiReportError?: string;
+  onGenerateReport?: () => void;
 }
 
 export default function StatsDashboard({
@@ -28,7 +32,11 @@ export default function StatsDashboard({
   customStartDate,
   onCustomStartDateChange,
   customEndDate,
-  onCustomEndDateChange
+  onCustomEndDateChange,
+  aiReport = '',
+  aiReportLoading = false,
+  aiReportError = '',
+  onGenerateReport
 }: StatsDashboardProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isBlockExpanded, setIsBlockExpanded] = useState(true);
@@ -206,7 +214,7 @@ export default function StatsDashboard({
             </div>
             <div>
               <h3 className="font-extrabold text-slate-900 text-xs uppercase tracking-tight">
-                {lang === 'th' ? 'สถิติเฝ้าระวังและการกรองสถานการณ์โรคติดต่อ' : 'Outbreak Statistics & Control Panel'}
+                {lang === 'th' ? '2. สถิติเฝ้าระวังและการกรองสถานการณ์โรคติดต่อ' : '2. Outbreak Statistics & Control Panel'}
               </h3>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">
                 {lang === 'th' ? 'คัดกรองตามหมวดหมู่โรค ช่วงเวลา และแสดงอัตราส่วนระบาดวิทยา' : 'Filter by disease categories, query timeline curves, and sanitary indicators'}
@@ -563,6 +571,90 @@ export default function StatsDashboard({
               </div>
             </div>
 
+          </div>
+
+          {/* AI Outbreak Intelligence Report Card */}
+          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-xs space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3 gap-3">
+              <div className="flex items-center space-x-2.5">
+                <div className="bg-cyan-500 text-white p-2 rounded shadow-xs">
+                  <TrendingUp size={16} />
+                </div>
+                <div>
+                  <h4 className="font-extrabold text-slate-900 text-xs uppercase tracking-tight flex items-center gap-1.5">
+                    <span>✨ {lang === 'th' ? 'รายงานวิเคราะห์อัจฉริยะโดย AI' : 'AI Outbreak Intelligence Report'}</span>
+                    <span className="text-[7px] bg-cyan-500/10 text-cyan-500 font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider">Gemini 2.5 Flash</span>
+                  </h4>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">
+                    {lang === 'th' ? 'รายงานประเมินสถานการณ์ระบาดเชิงลึกและการแทรกแซงทางสุขาภิบาลโดยละเอียด' : 'Deep epidemiological situation analysis and recommended health interventions'}
+                  </p>
+                </div>
+              </div>
+              
+              <button
+                onClick={onGenerateReport}
+                disabled={aiReportLoading}
+                className="bg-blue-650 hover:bg-blue-700 disabled:bg-blue-400 text-white text-[10px] font-black uppercase tracking-wider px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 cursor-pointer transition shrink-0 border-0"
+              >
+                <span>{aiReportLoading ? (lang === 'th' ? 'กำลังวิเคราะห์...' : 'Analyzing...') : (lang === 'th' ? 'วิเคราะห์ด้วย AI' : 'Generate AI Report')}</span>
+              </button>
+            </div>
+
+            {aiReportLoading && (
+              <div className="py-12 flex flex-col items-center justify-center space-y-3">
+                <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                <p className="text-xs text-slate-500 font-bold animate-pulse">
+                  {lang === 'th' ? 'Gemini กำลังวิเคราะห์แนวโน้มระบาดวิทยาของยะลา...' : 'Gemini is analyzing Yala epidemiological trends...'}
+                </p>
+              </div>
+            )}
+
+            {aiReportError && !aiReportLoading && (
+              <div className="bg-rose-50 border border-rose-100 p-4 rounded-lg text-rose-800 text-xs font-semibold flex items-center gap-2">
+                <AlertTriangle size={14} className="shrink-0" />
+                <span>{aiReportError}</span>
+              </div>
+            )}
+
+            {!aiReport && !aiReportLoading && !aiReportError && (
+              <div className="text-center py-10 border border-dashed border-slate-200 rounded-lg space-y-2">
+                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">
+                  {lang === 'th' ? 'ยังไม่ได้สร้างรายงานวิเคราะห์' : 'No report generated yet.'}
+                </p>
+                <p className="text-[10px] text-slate-400 font-semibold max-w-sm mx-auto">
+                  {lang === 'th' ? 'กดปุ่มด้านบนเพื่อรวบรวมประวัติผู้ป่วยทั้งหมดและให้ Gemini สรุปวิเคราะห์สถานการณ์ทางการแพทย์ระดับมืออาชีพ' : 'Click the button above to synthesize all case data and produce a professional epidemiological brief.'}
+                </p>
+              </div>
+            )}
+
+            {aiReport && !aiReportLoading && (
+              <div className="bg-slate-50 border border-slate-150 p-5 rounded-lg text-xs leading-relaxed text-slate-750 font-medium font-sans max-h-96 overflow-y-auto space-y-4 shadow-inner">
+                <div className="prose prose-slate max-w-none prose-xs font-semibold">
+                  {aiReport.split('\n').map((line, idx) => {
+                    const cleanLine = line.trim();
+                    if (cleanLine.startsWith('###')) {
+                      return <h4 key={idx} className="text-xs font-extrabold text-slate-950 mt-4 mb-2 uppercase tracking-tight">{cleanLine.replace('###', '').trim()}</h4>;
+                    }
+                    if (cleanLine.startsWith('####')) {
+                      return <h5 key={idx} className="text-[11px] font-extrabold text-slate-950 mt-3 mb-1.5">{cleanLine.replace('####', '').trim()}</h5>;
+                    }
+                    if (cleanLine.startsWith('##')) {
+                      return <h3 key={idx} className="text-xs font-extrabold text-slate-950 mt-5 mb-2.5 uppercase tracking-wide border-b border-slate-200 pb-1">{cleanLine.replace('##', '').trim()}</h3>;
+                    }
+                    if (cleanLine.startsWith('#')) {
+                      return <h2 key={idx} className="text-sm font-black text-slate-950 mt-6 mb-3 uppercase tracking-wider">{cleanLine.replace('#', '').trim()}</h2>;
+                    }
+                    if (cleanLine.startsWith('-') || cleanLine.startsWith('*')) {
+                      return <li key={idx} className="ml-4 list-disc text-slate-650 my-1">{cleanLine.substring(1).trim()}</li>;
+                    }
+                    if (cleanLine.length === 0) {
+                      return <div key={idx} className="h-2" />;
+                    }
+                    return <p key={idx} className="my-1.5 leading-relaxed">{line}</p>;
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
         </div>
