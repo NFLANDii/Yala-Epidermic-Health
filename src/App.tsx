@@ -3,7 +3,8 @@ import {
   Activity, ShieldAlert, Users, Calendar, Filter, CircleDot, 
   CheckSquare, Shield, Eye, LogOut, HeartPulse, Sparkles, 
   Bell, Check, AlertTriangle, BookOpen, Layers, Languages,
-  Search, ShieldCheck, HelpCircle, ArrowRight, TrendingUp, Info, Lock
+  Search, ShieldCheck, HelpCircle, ArrowRight, TrendingUp, Info, Lock,
+  Home, Map, BarChart3, ClipboardList, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 // Custom Sub-components
@@ -56,7 +57,7 @@ const translations = {
     loggedOutDesc: "คุณออกจากระบบรักษาความปลอดภัยเรียบร้อยแล้ว",
   },
   en: {
-    title: "Yala Epidemic Watch Hub",
+    title: "YALA EPEDERMIC HEALTH",
     subtitle: "Yala Municipal Disease Surveillance Portal",
     liveConnection: "Live Stream Active",
     registeredClusters: "Monitored Clusters",
@@ -96,9 +97,11 @@ export default function App() {
 
   // Active Sidebar Tab State
   const [activeSidebarTab, setActiveSidebarTab] = useState<'dashboard' | 'map' | 'statistics' | 'prevention' | 'cases'>('dashboard');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // Interactive User Tutorial Walkthrough state
   const [showTutorial, setShowTutorial] = useState(false);
+  const [floatingStatusExpanded, setFloatingStatusExpanded] = useState(false);
 
   // Scenario Mode Toggle (Normal vs Flood)
   const [scenarioMode, setScenarioMode] = useState<ScenarioMode>('Normal');
@@ -112,30 +115,6 @@ export default function App() {
   const [customStartDate, setCustomStartDate] = useState('');
   const [customEndDate, setCustomEndDate] = useState('');
 
-  // AI Outbreak Intelligence Report States
-  const [aiReport, setAiReport] = useState<string>('');
-  const [aiReportLoading, setAiReportLoading] = useState<boolean>(false);
-  const [aiReportError, setAiReportError] = useState<string>('');
-
-  const fetchAiReport = async () => {
-    setAiReportLoading(true);
-    setAiReportError('');
-    try {
-      const res = await fetch('/api/ai/outbreak-report');
-      if (res.ok) {
-        const data = await res.json();
-        setAiReport(data.report || '');
-      } else {
-        setAiReportError('Failed to fetch outbreak intelligence report.');
-      }
-    } catch (err) {
-      console.error(err);
-      setAiReportError('Network error while generating AI report.');
-    } finally {
-      setAiReportLoading(false);
-    }
-  };
-
   // Toast Notifications State
   const [toasts, setToasts] = useState<Toast[]>([]);
 
@@ -143,7 +122,7 @@ export default function App() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Array<{ id: string; titleTh: string; titleEn: string; date: string; unread: boolean; type: string }>>([
     { id: '1', titleTh: 'ตรวจพบดัชนีเสี่ยงโรคฉี่หนูเพิ่มขึ้น 15% หลังน้ำลดในเขตตำบลท่าสาป', titleEn: 'Leptospirosis index rose by 15% post-flood in Tha Sap district', date: 'Just now', unread: true, type: 'Flood' },
-    { id: '2', titleTh: 'ประกาศเปิดใช้ระบบพอร์ทัลตรวจโรคภัยพิบัติ ยะลา เอพิเดมิก เฮลท์', titleEn: 'Official launch of Yala Epidemic Health public monitoring system', date: '2 hours ago', unread: true, type: 'Info' },
+    { id: '2', titleTh: 'ประกาศเปิดใช้ระบบพอร์ทัลตรวจโรคภัยพิบัติ YALA EPEDERMIC HEALTH', titleEn: 'Official launch of YALA EPEDERMIC HEALTH public monitoring system', date: '2 hours ago', unread: true, type: 'Info' },
     { id: '3', titleTh: 'พบการรายงานโรคอุจจาระร่วงเฉียบพลันรายใหม่ในชุมชนสะเตงนอก', titleEn: 'New acute diarrhea cases registered in Sateng Nok village', date: 'Yesterday', unread: false, type: 'Alert' }
   ]);
 
@@ -278,7 +257,7 @@ export default function App() {
     };
 
     sse.onerror = (err) => {
-      console.error('Real-time connection stream dropped. Reconnecting...', err);
+      console.warn('Real-time connection stream notice: reconnecting if dropped.', err);
     };
 
     return () => {
@@ -386,7 +365,7 @@ export default function App() {
   const completedCount = filteredByScenarioCases.filter(c => c.status === 'Completed').length;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans flex" id="app_root">
+    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans flex flex-col md:flex-row" id="app_root">
       
       {/* 1. FLOATING TOASTS BANNER PANEL */}
       <div className="fixed top-4 right-4 z-50 space-y-2 max-w-sm w-full">
@@ -416,80 +395,108 @@ export default function App() {
         ))}
       </div>
 
-      {/* 2. LEFT SIDEBAR */}
-      <aside className="w-64 bg-slate-900 text-slate-200 flex flex-col shrink-0 border-r border-slate-800 sticky top-0 h-screen z-40" id="left_sidebar">
-        {/* Brand logo header with custom SVG vector logo */}
-        <div className="p-5 border-b border-slate-800 flex items-center space-x-3">
-          <YalaEpidemicLogo size={40} className="flex-shrink-0" />
-          <div>
-            <h1 className="font-black text-white text-[13px] tracking-tight leading-none uppercase font-sans">
-              Yala Epidemic
-            </h1>
-            <span className="text-[9px] text-cyan-400 font-extrabold tracking-widest uppercase block mt-1">
-              Surveillance Portal
-            </span>
+      {/* 2. RESPONSIVE SIDEBAR (COLLAPSIBLE ON DESKTOP & SCROLLABLE ON MOBILE/TABLET) */}
+      <aside className={`relative bg-slate-900 text-slate-200 flex shrink-0 border-slate-800 sticky top-0 z-40 transition-all duration-300
+        ${sidebarCollapsed 
+          ? 'md:w-20 md:flex-col h-auto md:h-screen border-b md:border-b-0 md:border-r flex-row w-full p-2' 
+          : 'md:w-64 md:flex-col h-auto md:h-screen border-b md:border-b-0 md:border-r flex-row w-full p-2 md:p-0'
+        }`} id="left_sidebar">
+        
+        {/* Brand Header */}
+        <div className={`border-slate-800 flex items-center justify-between transition-all duration-300 w-full md:w-auto
+          ${sidebarCollapsed 
+            ? 'md:p-4 md:border-b-0 md:justify-center flex-row px-2 shrink-0' 
+            : 'md:p-6 md:border-b flex-row px-3 md:px-6 shrink-0'
+          }`}>
+          <div className="flex items-center gap-3">
+            <YalaEpidemicLogo size={sidebarCollapsed ? 38 : 48} className="flex-shrink-0 transition-all duration-300" />
+            <div className={`${sidebarCollapsed ? 'md:hidden' : 'block'} min-w-0`}>
+              <h1 className="font-black text-white text-[12px] md:text-[15px] tracking-tight leading-none uppercase whitespace-normal break-words max-w-[170px]">
+                YALA EPEDERMIC HEALTH
+              </h1>
+              <span className="text-[9px] md:text-[10px] text-cyan-400 font-extrabold tracking-widest uppercase block mt-1.5 whitespace-nowrap">
+                {lang === 'th' ? 'ระบบเฝ้าระวังควบคุมโรค' : 'EPIDEMIC CONTROL'}
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Sidebar Nav Links - Restructured to 4 ordered tabs */}
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          {/* 1. หน้าหลัก (Dashboard) */}
+        {/* Centered Sidebar Collapse toggle button for Desktop (placed relative to aside border) */}
+        <button 
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          className="hidden md:flex absolute top-1/2 -right-3 transform -translate-y-1/2 w-6 h-6 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white items-center justify-center cursor-pointer transition z-50 shadow-md"
+          title={sidebarCollapsed ? "Expand Menu" : "Collapse Menu"}
+        >
+          {sidebarCollapsed ? <ChevronRight size={13} /> : <ChevronLeft size={13} />}
+        </button>
+
+        {/* Navigation - Horizontal scrolls on mobile, vertical stack on desktop */}
+        <nav className={`flex overflow-x-auto md:overflow-y-auto whitespace-nowrap md:whitespace-normal p-2 flex-1 scrollbar-none
+          ${sidebarCollapsed 
+            ? 'md:flex-col md:items-center flex-row gap-2' 
+            : 'md:flex-col flex-row gap-2 md:gap-1 md:p-4'
+          }`}>
+          
+          {/* Home */}
           <button
             onClick={() => setActiveSidebarTab('dashboard')}
-            className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-bold transition duration-150 cursor-pointer ${
-              activeSidebarTab === 'dashboard' 
+            className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-xs font-black transition duration-150 cursor-pointer shrink-0
+              ${activeSidebarTab === 'dashboard' 
                 ? 'bg-blue-600 text-white shadow-xs' 
                 : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-            }`}
+              } ${sidebarCollapsed ? 'md:justify-center md:w-12 md:px-0' : 'w-full'}`}
+            title={lang === 'th' ? 'หน้าหลัก' : 'Main Dashboard'}
           >
-            <Activity size={16} />
-            <span>{lang === 'th' ? '1. หน้าหลัก' : '1. Main Page'}</span>
+            <Home size={16} className="shrink-0" />
+            <span className={sidebarCollapsed ? 'md:hidden' : 'inline'}>{lang === 'th' ? 'หน้าหลัก' : 'Dashboard'}</span>
           </button>
 
-          {/* 2. แผนที่ (Map) */}
+          {/* Map */}
           <button
             onClick={() => setActiveSidebarTab('map')}
-            className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-bold transition duration-150 cursor-pointer ${
-              activeSidebarTab === 'map' 
+            className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-xs font-black transition duration-150 cursor-pointer shrink-0
+              ${activeSidebarTab === 'map' 
                 ? 'bg-blue-600 text-white shadow-xs' 
                 : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-            }`}
+              } ${sidebarCollapsed ? 'md:justify-center md:w-12 md:px-0' : 'w-full'}`}
+            title={lang === 'th' ? 'แผนที่ระบาด' : 'Epidemic Map'}
           >
-            <Layers size={16} />
-            <span>{lang === 'th' ? '2. แผนที่' : '2. Map System'}</span>
+            <Map size={16} className="shrink-0" />
+            <span className={sidebarCollapsed ? 'md:hidden' : 'inline'}>{lang === 'th' ? 'แผนที่ระบาด' : 'GIS Map'}</span>
           </button>
 
-          {/* 3. สถิติและรายงานโรค (Statistics) */}
+          {/* Statistics */}
           <button
             onClick={() => setActiveSidebarTab('statistics')}
-            className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-bold transition duration-150 cursor-pointer ${
-              activeSidebarTab === 'statistics' 
+            className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-xs font-black transition duration-150 cursor-pointer shrink-0
+              ${activeSidebarTab === 'statistics' 
                 ? 'bg-blue-600 text-white shadow-xs' 
                 : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-            }`}
+              } ${sidebarCollapsed ? 'md:justify-center md:w-12 md:px-0' : 'w-full'}`}
+            title={lang === 'th' ? 'สถิติโรค' : 'Disease Analytics'}
           >
-            <TrendingUp size={16} />
-            <span>{lang === 'th' ? '3. สถิติและรายงานโรค' : '3. Disease Statistics'}</span>
+            <BarChart3 size={16} className="shrink-0" />
+            <span className={sidebarCollapsed ? 'md:hidden' : 'inline'}>{lang === 'th' ? 'สถิติโรค' : 'Statistics'}</span>
           </button>
 
-          {/* 4. คู่มือป้องกันโรคระบาด (Prevention) - Merged with disease_intel */}
+          {/* Prevention */}
           <button
             onClick={() => setActiveSidebarTab('prevention')}
-            className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs font-bold transition duration-150 cursor-pointer ${
-              activeSidebarTab === 'prevention' 
+            className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-xs font-black transition duration-150 cursor-pointer shrink-0
+              ${activeSidebarTab === 'prevention' 
                 ? 'bg-blue-600 text-white shadow-xs' 
                 : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-            }`}
+              } ${sidebarCollapsed ? 'md:justify-center md:w-12 md:px-0' : 'w-full'}`}
+            title={lang === 'th' ? 'คู่มือป้องกัน' : 'Prevention'}
           >
-            <BookOpen size={16} />
-            <span className="flex-1 text-left">{lang === 'th' ? '4. คู่มือป้องกันโรคระบาด' : '4. Prevention Guide'}</span>
-            <span className="text-[8px] bg-cyan-500/20 text-cyan-400 font-extrabold px-1.5 py-0.5 rounded uppercase">Merged</span>
+            <HeartPulse size={16} className="shrink-0" />
+            <span className={sidebarCollapsed ? 'md:hidden' : 'inline'}>{lang === 'th' ? 'คู่มือป้องกัน' : 'Guides'}</span>
           </button>
 
-          {/* Separator line */}
-          <div className="border-t border-slate-800 my-4" />
+          {/* Desktop Divider */}
+          <div className="hidden md:block border-t border-slate-800 my-2 w-full" />
 
-          {/* Case Management (Officials only tab) */}
+          {/* Official cases */}
           <button
             onClick={() => {
               if (auth) {
@@ -499,29 +506,33 @@ export default function App() {
                 setActiveSidebarTab('cases');
               }
             }}
-            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-bold transition duration-150 cursor-pointer ${
-              activeSidebarTab === 'cases' 
-                ? 'bg-blue-600 text-white' 
+            className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-black transition duration-150 cursor-pointer shrink-0
+              ${activeSidebarTab === 'cases' 
+                ? 'bg-blue-600 text-white shadow-xs' 
                 : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-            }`}
+              } ${sidebarCollapsed ? 'md:justify-center md:w-12 md:px-0' : 'w-full'}`}
+            title={lang === 'th' ? 'จัดการเคส' : 'Cases Control'}
           >
-            <div className="flex items-center space-x-3">
-              <CheckSquare size={16} />
-              <span>{lang === 'th' ? 'ระบบจัดการเคส (เจ้าหน้าที่)' : 'Case Control Panel'}</span>
+            <div className="flex items-center space-x-2">
+              <ClipboardList size={16} className="shrink-0" />
+              <span className={sidebarCollapsed ? 'md:hidden' : 'inline'}>{lang === 'th' ? 'จัดการเคส' : 'Officials'}</span>
             </div>
-            {!auth && <Lock size={12} className="text-slate-500" />}
+            {!sidebarCollapsed && !auth && <Lock size={11} className="text-slate-500 hidden md:block" />}
           </button>
+
         </nav>
 
-        {/* Live sync connection badge */}
-        <div className="p-4 border-t border-slate-800 space-y-2">
-          <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 flex items-center space-x-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[9px] font-black text-slate-400 tracking-wider uppercase">
-              {lang === 'th' ? 'พอร์ทัลตรวจโรคทำงาน' : 'GIS CHANNEL LIVE'}
-            </span>
+        {/* Live sync badge (hidden if collapsed or on mobile to stay hyper compact) */}
+        {!sidebarCollapsed && (
+          <div className="hidden md:block p-4 border-t border-slate-800">
+            <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800 flex items-center space-x-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[9px] font-black text-slate-400 tracking-wider uppercase">
+                {lang === 'th' ? 'ระบบตรวจสดทำงาน' : 'GIS LIVE'}
+              </span>
+            </div>
           </div>
-        </div>
+        )}
       </aside>
 
       {/* 3. MAIN WORKSPACE */}
@@ -723,14 +734,14 @@ export default function App() {
                       </div>
 
                       {/* Marquee Ticker */}
-                      <div className="bg-red-950 border-2 border-red-500 overflow-hidden py-3 flex items-center shadow-lg rounded-xl" id="marquee_news_ticker">
-                        <div className="bg-red-600 text-white font-black text-[10px] uppercase tracking-wider px-3 py-1.5 rounded-md ml-3 mr-4 shrink-0 flex items-center gap-1.5 shadow-sm border border-red-400">
-                          <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+                      <div className="bg-slate-950 border-2 border-red-600 overflow-hidden py-3 flex items-center shadow-lg rounded-xl" id="marquee_news_ticker">
+                        <div className="bg-red-600 text-white font-black text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-md ml-3 mr-4 shrink-0 flex items-center gap-1.5 shadow-sm border border-red-500">
+                          <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
                           <span>{lang === 'th' ? 'ข่าวด่วนวันนี้' : 'Breaking News'}</span>
                         </div>
                         <div className="overflow-hidden relative w-full h-6 flex items-center">
-                          <div className="absolute whitespace-nowrap animate-marquee font-black text-sm text-yellow-300 tracking-wider">
-                            {notifications.map(n => lang === 'th' ? `📢 ${n.titleTh}` : `📢 ${n.titleEn}`).join('   •   ')}
+                          <div className="absolute whitespace-nowrap animate-marquee font-extrabold text-sm text-yellow-400 tracking-wider">
+                            {notifications.map(n => lang === 'th' ? `📢 ${n.titleTh}` : `📢 ${n.titleEn}`).join('      •      ')}
                           </div>
                         </div>
                       </div>
@@ -779,36 +790,99 @@ export default function App() {
 
                       {/* Summary Cards Grid */}
                       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                        {/* KPI 1 */}
-                        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs space-y-1.5">
-                          <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider block font-mono">{lang === 'th' ? 'จำนวนเคสที่บันทึก' : 'Monitored cases'}</span>
-                          <div className="flex items-baseline space-x-1.5">
-                            <span className="text-xl font-black text-slate-900 leading-none">{totalCases}</span>
-                            <span className="text-[10px] text-slate-500 font-bold">{lang === 'th' ? 'เคสทั้งหมด' : 'total'}</span>
+                        {/* KPI 1 - Monitored cases */}
+                        <div className="bg-sky-50/90 p-5 rounded-2xl border border-sky-200 shadow-2xs space-y-2 hover:shadow-xs hover:border-sky-300 transition duration-150">
+                          <span className="text-[11px] md:text-xs text-sky-800 font-black uppercase tracking-wider block font-mono">
+                            {lang === 'th' ? 'จำนวนเคสที่บันทึก' : 'Monitored cases'}
+                          </span>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-baseline space-x-1.5">
+                              <span className="text-4xl md:text-5xl font-black text-sky-950 block leading-none">{totalCases}</span>
+                              <span className="text-[11px] md:text-xs text-sky-700 font-bold">{lang === 'th' ? 'ราย' : 'cases'}</span>
+                            </div>
+                            {scenarioMode === 'Flood' ? (
+                              <div className="flex items-center space-x-1 text-red-600 font-extrabold text-xs md:text-sm animate-bounce shrink-0" style={{ animationDuration: '2s' }}>
+                                <span className="text-sm md:text-base font-black">▲</span>
+                                <span>+45%</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center space-x-1 text-emerald-600 font-extrabold text-xs md:text-sm animate-pulse shrink-0">
+                                <span className="text-sm md:text-base font-black">▼</span>
+                                <span>-15%</span>
+                              </div>
+                            )}
                           </div>
                         </div>
-                        {/* KPI 2 */}
-                        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs space-y-1.5">
-                          <span className="text-[9px] text-rose-500 font-bold uppercase tracking-wider block font-mono">{lang === 'th' ? 'เคสอันตรายสูง' : 'Critical Outbreaks'}</span>
-                          <div className="flex items-baseline space-x-1.5">
-                            <span className="text-xl font-black text-rose-600 leading-none">{highRiskCount}</span>
-                            <span className="text-[10px] text-slate-500 font-bold">{lang === 'th' ? 'จุดวงแดง' : 'red circles'}</span>
+
+                        {/* KPI 2 - Critical Outbreaks */}
+                        <div className="bg-rose-50/90 p-5 rounded-2xl border border-rose-200 shadow-2xs space-y-2 hover:shadow-xs hover:border-rose-300 transition duration-150">
+                          <span className="text-[11px] md:text-xs text-rose-800 font-black uppercase tracking-wider block font-mono">
+                            {lang === 'th' ? 'เคสอันตรายสูง' : 'Critical Outbreaks'}
+                          </span>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-baseline space-x-1.5">
+                              <span className="text-4xl md:text-5xl font-black text-rose-950 block leading-none">{highRiskCount}</span>
+                              <span className="text-[11px] md:text-xs text-rose-700 font-bold">{lang === 'th' ? 'จุดแดง' : 'red circles'}</span>
+                            </div>
+                            {scenarioMode === 'Flood' ? (
+                              <div className="flex items-center space-x-1 text-red-600 font-extrabold text-xs md:text-sm animate-bounce shrink-0" style={{ animationDuration: '1.8s' }}>
+                                <span className="text-sm md:text-base font-black">▲</span>
+                                <span>+60%</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center space-x-1 text-emerald-600 font-extrabold text-xs md:text-sm animate-pulse shrink-0">
+                                <span className="text-sm md:text-base font-black">▼</span>
+                                <span>-40%</span>
+                              </div>
+                            )}
                           </div>
                         </div>
-                        {/* KPI 3 */}
-                        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs space-y-1.5">
-                          <span className="text-[9px] text-purple-500 font-bold uppercase tracking-wider block font-mono">{lang === 'th' ? 'อยู่ระหว่างรอผลแล็บ' : 'Waiting lab tests'}</span>
-                          <div className="flex items-baseline space-x-1.5">
-                            <span className="text-xl font-black text-purple-600 leading-none">{waitingCount}</span>
-                            <span className="text-[10px] text-slate-500 font-bold">{lang === 'th' ? 'ราย' : 'patients'}</span>
+
+                        {/* KPI 3 - Waiting lab tests */}
+                        <div className="bg-purple-50/90 p-5 rounded-2xl border border-purple-200 shadow-2xs space-y-2 hover:shadow-xs hover:border-purple-300 transition duration-150">
+                          <span className="text-[11px] md:text-xs text-purple-800 font-black uppercase tracking-wider block font-mono">
+                            {lang === 'th' ? 'อยู่ระหว่างรอผลแล็บ' : 'Waiting lab tests'}
+                          </span>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-baseline space-x-1.5">
+                              <span className="text-4xl md:text-5xl font-black text-purple-950 block leading-none">{waitingCount}</span>
+                              <span className="text-[11px] md:text-xs text-purple-700 font-bold">{lang === 'th' ? 'ราย' : 'patients'}</span>
+                            </div>
+                            {scenarioMode === 'Flood' ? (
+                              <div className="flex items-center space-x-1 text-red-600 font-extrabold text-xs md:text-sm animate-bounce shrink-0" style={{ animationDuration: '2.2s' }}>
+                                <span className="text-sm md:text-base font-black">▲</span>
+                                <span>+30%</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center space-x-1 text-emerald-600 font-extrabold text-xs md:text-sm animate-pulse shrink-0">
+                                <span className="text-sm md:text-base font-black">▼</span>
+                                <span>-25%</span>
+                              </div>
+                            )}
                           </div>
                         </div>
-                        {/* KPI 4 */}
-                        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs space-y-1.5">
-                          <span className="text-[9px] text-emerald-500 font-bold uppercase tracking-wider block font-mono">{lang === 'th' ? 'หายดี/พ้นระยะเสี่ยง' : 'Discharged/Completed'}</span>
-                          <div className="flex items-baseline space-x-1.5">
-                            <span className="text-xl font-black text-emerald-600 leading-none">{completedCount}</span>
-                            <span className="text-[10px] text-slate-500 font-bold">{lang === 'th' ? 'สำเร็จ' : 'cases'}</span>
+
+                        {/* KPI 4 - Discharged/Completed */}
+                        <div className="bg-emerald-50/90 p-5 rounded-2xl border border-emerald-200 shadow-2xs space-y-2 hover:shadow-xs hover:border-emerald-300 transition duration-150">
+                          <span className="text-[11px] md:text-xs text-emerald-800 font-black uppercase tracking-wider block font-mono">
+                            {lang === 'th' ? 'หายดี/พ้นระยะเสี่ยง' : 'Discharged/Completed'}
+                          </span>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-baseline space-x-1.5">
+                              <span className="text-4xl md:text-5xl font-black text-emerald-950 block leading-none">{completedCount}</span>
+                              <span className="text-[11px] md:text-xs text-emerald-700 font-bold">{lang === 'th' ? 'สำเร็จ' : 'cases'}</span>
+                            </div>
+                            {scenarioMode === 'Flood' ? (
+                              <div className="flex items-center space-x-1 text-emerald-600 font-extrabold text-xs md:text-sm animate-pulse shrink-0">
+                                <span className="text-sm md:text-base font-black">▼</span>
+                                <span>-10%</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center space-x-1 text-emerald-600 font-extrabold text-xs md:text-sm animate-bounce shrink-0" style={{ animationDuration: '2.5s' }}>
+                                <span className="text-sm md:text-base font-black">▲</span>
+                                <span>+8%</span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -944,6 +1018,92 @@ export default function App() {
                         </button>
                       </div>
 
+                      {/* Yala Municipal Geographical & General Information Card */}
+                      <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+                        <div className="flex items-center space-x-2.5 pb-2 border-b border-slate-100">
+                          <Info className="text-blue-600 animate-pulse" size={16} />
+                          <div>
+                            <h3 className="font-extrabold text-slate-900 text-xs uppercase tracking-tight">
+                              {lang === 'th' ? 'ข้อมูลภูมิศาสตร์และสถิติทั่วไป เทศบาลนครยะลา (อบจ. ยะลา)' : 'Yala Municipality Geographical & General Information'}
+                            </h3>
+                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">
+                              {lang === 'th' ? 'สถิติการวางผังเมือง โครงสร้างชุมชนพหุวัฒนธรรม และพิกัดเชิงพื้นที่' : 'Official municipal planning, population stats, and smart vision'}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Vision Banner */}
+                        <div className="bg-blue-50/70 border border-blue-100/80 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-slate-800">
+                          <div className="flex items-center gap-3">
+                            <span className="text-xl shrink-0">🏛️</span>
+                            <div>
+                              <strong className="text-xs text-blue-950 block font-black">
+                                {lang === 'th' ? 'วิสัยทัศน์การพัฒนาเทศบาลนครยะลา:' : 'Yala Municipal Vision:'}
+                              </strong>
+                              <span className="text-xs text-slate-700 font-bold italic">
+                                {lang === 'th' ? '"ยะลา เมืองน่าอยู่ คู่สันติสุข มุ่งสู่เมืองอัจฉริยะ (Smart City)"' : '"Yala: Liveable City, Peaceful Coexistence, Towards Smart City"'}
+                              </span>
+                            </div>
+                          </div>
+                          <span className="text-[9px] bg-blue-100 text-blue-800 font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider shrink-0 self-start sm:self-auto">
+                            {lang === 'th' ? 'อบจ. ยะลา' : 'YALA PAO'}
+                          </span>
+                        </div>
+
+                        {/* Main Info Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          
+                          {/* Item 1: City Planning */}
+                          <div className="p-4 rounded-xl bg-slate-50 border border-slate-150/70 space-y-1.5">
+                            <div className="flex items-center space-x-2 text-slate-800 font-extrabold text-xs uppercase tracking-tight">
+                              <span className="text-lg">🕸️</span>
+                              <span>{lang === 'th' ? 'ผังเมืองใยแมงมุมอัจฉริยะ' : 'Spider-Web City Design'}</span>
+                            </div>
+                            <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
+                              {lang === 'th' ? 'ผังเมืองยะลาถูกจัดวางอย่างเป็นระเบียบเรียบร้อยที่สุดในประเทศไทย เป็นรูปวงเวียนใยแมงมุมซ้อนกัน 3 ชั้น (Circular Web) สะดวกและแม่นยำอย่างยิ่งต่อการจัดวางระบบสารสนเทศภูมิศาสตร์ GIS และการจำกัดรัศมีความเสี่ยงโรคระบาด'
+                                            : 'Renowned for having the best circular spider-web urban planning in Thailand. Divided into concentric zones centered around landmarks, which uniquely facilitates precise GIS analysis and epidemic perimeter controls.'}
+                            </p>
+                          </div>
+
+                          {/* Item 2: Geographical Scale */}
+                          <div className="p-4 rounded-xl bg-slate-50 border border-slate-150/70 space-y-1.5">
+                            <div className="flex items-center space-x-2 text-slate-800 font-extrabold text-xs uppercase tracking-tight">
+                              <span className="text-lg">🗺️</span>
+                              <span>{lang === 'th' ? 'พื้นที่และการปกครอง' : 'Geographical Scale & Boundaries'}</span>
+                            </div>
+                            <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
+                              {lang === 'th' ? 'ครอบคลุมพื้นที่ตำบลสะเตง อำเภอเมืองยะลา ขนาดประมาณ 19.0 ตารางกิโลเมตร (11,875 ไร่) แบ่งการดูแลออกเป็นชุมชนย่อยทั้งหมดกว่า 40 ชุมชน เพื่อประเมินดัชนีสุขอนามัยชุมชนสะเตงนอก ชุมชนท่าสาป และชุมชนสะเตงกลางอย่างทั่วถึง'
+                                            : 'Encompasses 19.0 square kilometers (approx. 11,875 Rai) under Sateng subdistrict, divided into over 40 distinct sub-communities. This spatial resolution aids Yala health officers in conducting targeted checks for Sateng Nok and Tha Sap.'}
+                            </p>
+                          </div>
+
+                          {/* Item 3: Demographics */}
+                          <div className="p-4 rounded-xl bg-slate-50 border border-slate-150/70 space-y-1.5">
+                            <div className="flex items-center space-x-2 text-slate-800 font-extrabold text-xs uppercase tracking-tight">
+                              <span className="text-lg">👥</span>
+                              <span>{lang === 'th' ? 'ประชากรและพหุวัฒนธรรม' : 'Multicultural Demographics'}</span>
+                            </div>
+                            <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
+                              {lang === 'th' ? 'มีประชากรจดทะเบียนหนาแน่นกว่า 60,000 ถึง 76,000 คน อาศัยอยู่ร่วมกันอย่างสันติสุขภายใต้สังคมพหุวัฒนธรรมอย่างงดงาม (ไทยพุทธ, ไทยมุสลิม, และไทยเชื้อสายจีน) เป็นสังคมเมืองน่าอยู่ที่เป็นแบบอย่างของการช่วยเหลือเกื้อกูล'
+                                            : 'Home to more than 60,000 - 76,000 registered residents living in harmony under a rich multicultural tapestry of Thai Buddhists, Thai Muslims, and Thai-Chinese lineages, acting as a model for inclusive civic care.'}
+                            </p>
+                          </div>
+
+                          {/* Item 4: Sanitary Partnerships */}
+                          <div className="p-4 rounded-xl bg-slate-50 border border-slate-150/70 space-y-1.5">
+                            <div className="flex items-center space-x-2 text-slate-800 font-extrabold text-xs uppercase tracking-tight">
+                              <span className="text-lg">🛡️</span>
+                              <span>{lang === 'th' ? 'ความสอดประสานทางสาธารณสุข' : 'Smart Sanitary Integration'}</span>
+                            </div>
+                            <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
+                              {lang === 'th' ? 'องค์การบริหารส่วนจังหวัดยะลา และ สำนักสาธารณสุขและสิ่งแวดล้อม เทศบาลนครยะลา ร่วมกันบริหารคลังความรู้ ดัชนีสุขอนามัย และระบบแจ้งเตือนภัยน้ำท่วม/ภัยพิบัติโรคระบาดประจำถิ่น (ไข้เลือดออก, โรคมือเท้าปาก, โรคฉี่หนู) อย่างใกล้ชิด'
+                                            : 'Yala PAO and the Municipal Division of Public Health & Environment work closely to host integrated cloud databases, flood water surveillance systems, and seasonal epidemic alert networks to safeguard civilian lives.'}
+                            </p>
+                          </div>
+
+                        </div>
+                      </div>
+
                     </div>
                   );
 
@@ -977,10 +1137,7 @@ export default function App() {
                         onCustomStartDateChange={setCustomStartDate}
                         customEndDate={customEndDate}
                         onCustomEndDateChange={setCustomEndDate}
-                        aiReport={aiReport}
-                        aiReportLoading={aiReportLoading}
-                        aiReportError={aiReportError}
-                        onGenerateReport={fetchAiReport}
+                        scenarioMode={scenarioMode}
                       />
                     </div>
                   );
@@ -1016,18 +1173,20 @@ export default function App() {
         </main>
 
         {/* MUNICIPAL FOOTER */}
-        <footer className="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 mt-auto" id="app_footer">
-          <div className="max-w-7xl mx-auto px-6 space-y-2">
-            <p className="font-extrabold text-slate-800 uppercase tracking-wider">
-              © {new Date().getFullYear()} {lang === 'th' ? 'เทศบาลนครยะลา. สงวนลิขสิทธิ์ทั้งหมด' : 'Yala Municipality. All rights reserved.'}
-            </p>
-            <p className="text-[10px] text-slate-400 leading-relaxed max-w-xl mx-auto font-semibold">
-              {lang === 'th' 
-                ? 'ระบบข้อมูลสารสนเทศภูมิศาสตร์นี้ให้บริการเพื่อความปลอดภัยและสุขลักษณะของเทศบาลนครยะลา ข้อมูลรายงานตนทั้งหมดได้รับการดูแลและรักษาความปลอดภัยภายใต้ระเบียบราชการสาธารณสุขยะลาอย่างเคร่งครัด'
-                : 'This monitoring system serves as the official sanitary portal. Webhook data received via the municipal report chatbot is classified and processed under compliance with the Yala Municipal Public Health Ordinance.'}
-            </p>
-          </div>
-        </footer>
+        {activeSidebarTab !== 'map' && (
+          <footer className="bg-white border-t border-slate-200 py-3 text-center text-[10px] text-slate-500 mt-auto" id="app_footer">
+            <div className="max-w-7xl mx-auto px-6 space-y-1">
+              <p className="font-extrabold text-slate-700 uppercase tracking-wider text-[9px]">
+                © {new Date().getFullYear()} {lang === 'th' ? 'เทศบาลนครยะลา. สงวนลิขสิทธิ์ทั้งหมด' : 'Yala Municipality. All rights reserved.'}
+              </p>
+              <p className="text-[9px] text-slate-400 leading-relaxed max-w-xl mx-auto font-semibold">
+                {lang === 'th' 
+                  ? 'ระบบข้อมูลสารสนเทศภูมิศาสตร์นี้ให้บริการเพื่อความปลอดภัยและสุขลักษณะของเทศบาลนครยะลา ข้อมูลรายงานตนทั้งหมดได้รับการดูแลและรักษาความปลอดภัยภายใต้ระเบียบราชการสาธารณสุขยะลาอย่างเคร่งครัด'
+                  : 'This monitoring system serves as the official sanitary portal. Webhook data received via the municipal report chatbot is classified and processed under compliance with the Yala Municipal Public Health Ordinance.'}
+              </p>
+            </div>
+          </footer>
+        )}
 
       </div>
 

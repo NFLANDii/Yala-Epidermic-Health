@@ -204,6 +204,14 @@ export default function MapSystem({
   const [userLocation, setUserLocation] = useState<google.maps.LatLngLiteral | null>(null);
   const [draggablePin, setDraggablePin] = useState<google.maps.LatLngLiteral | null>(null);
   const [locationStatus, setLocationStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [locationErrorMsg, setLocationErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (locationErrorMsg) {
+      const t = setTimeout(() => setLocationErrorMsg(null), 5000);
+      return () => clearTimeout(t);
+    }
+  }, [locationErrorMsg]);
 
   // Disease Filter State
   const [selectedDiseaseFilter, setSelectedDiseaseFilter] = useState<string>('all');
@@ -235,7 +243,7 @@ export default function MapSystem({
     setLocationStatus('loading');
     if (!navigator.geolocation) {
       setLocationStatus('error');
-      alert(lang === 'th' ? 'เบราว์เซอร์ของคุณไม่สนับสนุนการระบุตำแหน่งผ่าน GPS' : 'Your browser does not support GPS location.');
+      setLocationErrorMsg(lang === 'th' ? 'เบราว์เซอร์ของคุณไม่สนับสนุนการระบุตำแหน่งผ่าน GPS' : 'Your browser does not support GPS location.');
       return;
     }
 
@@ -252,9 +260,9 @@ export default function MapSystem({
         setLocationStatus('success');
       },
       (error) => {
-        console.error("Error fetching location:", error);
+        console.warn("Location fetch status info:", error.message);
         setLocationStatus('error');
-        alert(lang === 'th' ? 'กรุณาอนุญาตสิทธิ์เข้าถึงพิกัดเพื่อทำรายการระบุพิกัดในแผนที่' : 'Please grant location access to display your current position.');
+        setLocationErrorMsg(lang === 'th' ? 'กรุณาอนุญาตสิทธิ์เข้าถึงพิกัด หรือระบบไม่สามารถระบุพิกัดได้ (ใช้พิกัดเริ่มต้น ยะลา)' : 'Please grant location access or enable GPS (using default Yala coordinates).');
       },
       { enableHighAccuracy: true, timeout: 8000 }
     );
@@ -305,11 +313,13 @@ export default function MapSystem({
     const normDisease = c.disease.toLowerCase();
 
     if (normFilter === 'dengue' && (normDisease.includes('dengue') || normDisease.includes('ไข้เลือดออก'))) return true;
+    if (normFilter === 'covid' && (normDisease.includes('covid') || normDisease.includes('โควิด'))) return true;
+    if (normFilter === 'mouth' && (normDisease.includes('mouth') || normDisease.includes('มือ เท้า ปาก'))) return true;
+    if (normFilter === 'flu' && (normDisease.includes('flu') || normDisease.includes('ไข้หวัดใหญ่') || normDisease.includes('influenza'))) return true;
     if (normFilter === 'leptospirosis' && (normDisease.includes('leptospirosis') || normDisease.includes('ฉี่หนู'))) return true;
-    if (normFilter === 'cholera' && (normDisease.includes('cholera') || normDisease.includes('อหิวา'))) return true;
     if (normFilter === 'diarrhea' && (normDisease.includes('diarrhea') || normDisease.includes('อุจจาระร่วง') || normDisease.includes('ท้องร่วง'))) return true;
     if (normFilter === 'skin' && (normDisease.includes('skin') || normDisease.includes('น้ำกัดเท้า') || normDisease.includes('ผิวหนัง'))) return true;
-    if (normFilter === 'food' && (normDisease.includes('food') || normDisease.includes('อาหารเป็นพิษ'))) return true;
+    if (normFilter === 'cholera' && (normDisease.includes('cholera') || normDisease.includes('อหิวา'))) return true;
 
     return false;
   });
@@ -448,11 +458,13 @@ export default function MapSystem({
             >
               <option value="all" className="bg-slate-900">{lang === 'th' ? 'ทั้งหมด (All)' : 'All Diseases'}</option>
               <option value="dengue" className="bg-slate-900">{lang === 'th' ? 'โรคไข้เลือดออก' : 'Dengue Fever'}</option>
+              <option value="covid" className="bg-slate-900">{lang === 'th' ? 'โรคโควิด-19' : 'COVID-19'}</option>
+              <option value="mouth" className="bg-slate-900">{lang === 'th' ? 'โรคมือ เท้า ปาก' : 'Hand, Foot, & Mouth'}</option>
+              <option value="flu" className="bg-slate-900">{lang === 'th' ? 'โรคไข้หวัดใหญ่' : 'Influenza'}</option>
               <option value="leptospirosis" className="bg-slate-900">{lang === 'th' ? 'โรคฉี่หนู' : 'Leptospirosis'}</option>
-              <option value="cholera" className="bg-slate-900">{lang === 'th' ? 'โรคอหิวาตกโรค' : 'Cholera'}</option>
               <option value="diarrhea" className="bg-slate-900">{lang === 'th' ? 'โรคอุจจาระร่วงเฉียบพลัน' : 'Diarrhea'}</option>
-              <option value="skin" className="bg-slate-900">{lang === 'th' ? 'โรคผิวหนัง/น้ำกัดเท้า' : 'Skin Infections'}</option>
-              <option value="food" className="bg-slate-900">{lang === 'th' ? 'โรคอาหารเป็นพิษ' : 'Food Poisoning'}</option>
+              <option value="skin" className="bg-slate-900">{lang === 'th' ? 'โรคผิวหนังและน้ำกัดเท้า' : 'Skin Infections'}</option>
+              <option value="cholera" className="bg-slate-900">{lang === 'th' ? 'โรคอหิวาตกโรค' : 'Cholera'}</option>
             </select>
           </div>
 
@@ -607,19 +619,11 @@ export default function MapSystem({
               </>
             )}
 
-            {/* Draggable marker placed by user touch/click */}
+            {/* Locked marker placed by user touch/click */}
             {draggablePin && (
               <AdvancedMarker
                 position={draggablePin}
-                draggable={true}
-                onDragEnd={(e) => {
-                  if (e.latLng) {
-                    setDraggablePin({
-                      lat: e.latLng.lat(),
-                      lng: e.latLng.lng()
-                    });
-                  }
-                }}
+                draggable={false}
               >
                 <Pin background="#3b82f6" borderColor="#ffffff" glyphColor="#ffffff" scale={1.2}>
                   📍
@@ -679,6 +683,18 @@ export default function MapSystem({
             </div>
           )}
         </div>
+
+        {locationErrorMsg && (
+          <div className="absolute top-26 left-4 max-w-[210px] bg-red-950/95 backdrop-blur-md border border-red-900/50 p-2 rounded-lg shadow-2xl z-10 flex flex-col space-y-1 animate-bounce">
+            <div className="flex items-center space-x-1 text-[10px] font-black text-red-200">
+              <span>⚠️</span>
+              <span>{lang === 'th' ? 'พิกัดทางภูมิศาสตร์' : 'Geographical GPS'}</span>
+            </div>
+            <p className="text-[9px] text-red-300 font-bold leading-snug">
+              {locationErrorMsg}
+            </p>
+          </div>
+        )}
 
         {/* Map Legend Overlay with colored pins description */}
         <div className="absolute bottom-18 left-5 bg-slate-900/95 backdrop-blur-md border border-slate-800 p-2.5 rounded-xl flex flex-col space-y-1.5 shadow-2xl max-w-[210px] z-10 text-[10px]">

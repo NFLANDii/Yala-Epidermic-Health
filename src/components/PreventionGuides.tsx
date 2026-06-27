@@ -87,22 +87,24 @@ export default function PreventionGuides({ lang }: PreventionGuidesProps) {
                 </p>
               </div>
 
-              {/* Quick Disease Selector Chips */}
-              <div className="flex flex-wrap gap-2 border-b border-slate-100 pb-4">
-                {preventionData.map((item, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setSelectedIdx(idx)}
-                    type="button"
-                    className={`px-3.5 py-2 rounded-lg text-xs font-extrabold uppercase tracking-wide transition border cursor-pointer ${
-                      selectedIdx === idx
-                        ? 'bg-blue-600 text-white border-blue-600 shadow-md'
-                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-slate-900'
-                    }`}
+              {/* Beautiful Scrollable Dropdown Selector */}
+              <div className="pb-2 border-b border-slate-100">
+                <div className="relative max-w-xs">
+                  <select
+                    value={selectedIdx}
+                    onChange={(e) => setSelectedIdx(Number(e.target.value))}
+                    className="w-full bg-white border border-slate-200 text-slate-850 rounded-xl pl-4 pr-10 py-3 text-xs md:text-sm font-extrabold focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer shadow-3xs appearance-none transition"
                   >
-                    {lang === 'th' ? item.disease_th : item.disease_en}
-                  </button>
-                ))}
+                    {preventionData.map((item, idx) => (
+                      <option key={idx} value={idx}>
+                        {lang === 'th' ? item.disease_th : item.disease_en}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-slate-400">
+                    <ChevronDown size={16} />
+                  </div>
+                </div>
               </div>
 
               {/* Guide Display Card */}
@@ -120,10 +122,10 @@ export default function PreventionGuides({ lang }: PreventionGuidesProps) {
                   {/* TOPIC 1: Origin & Transmission */}
                   <div className="bg-white p-4.5 rounded-xl border border-slate-200/80 shadow-2xs space-y-2 flex flex-col justify-between">
                     <div>
-                      <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest block font-mono mb-1.5">
+                      <span className="text-xs md:text-sm font-extrabold text-blue-600 tracking-tight block mb-1.5">
                         {lang === 'th' ? '1. โรคนี้มาจากไหน ติดได้อย่างไร?' : '1. Origin & Transmission'}
                       </span>
-                      <p className="text-xs md:text-[13px] text-slate-800 leading-relaxed font-bold">
+                      <p className="text-xs md:text-[13px] text-slate-700 leading-relaxed font-medium">
                         {lang === 'th' ? selectedGuide.cause_th : selectedGuide.cause_en}
                       </p>
                     </div>
@@ -132,10 +134,10 @@ export default function PreventionGuides({ lang }: PreventionGuidesProps) {
                   {/* TOPIC 2: Checking symptoms */}
                   <div className="bg-white p-4.5 rounded-xl border border-slate-200/80 shadow-2xs space-y-2 flex flex-col justify-between">
                     <div>
-                      <span className="text-[10px] font-black text-rose-600 uppercase tracking-widest block font-mono mb-1.5">
+                      <span className="text-xs md:text-sm font-extrabold text-rose-600 tracking-tight block mb-1.5">
                         {lang === 'th' ? '2. สังเกตอาการอย่างไร? (เช็คอาการ)' : '2. Checking Symptoms'}
                       </span>
-                      <p className="text-xs md:text-[13px] text-slate-800 leading-relaxed font-bold">
+                      <p className="text-xs md:text-[13px] text-slate-700 leading-relaxed font-medium">
                         {lang === 'th' ? selectedGuide.symptoms_th : selectedGuide.symptoms_en}
                       </p>
                     </div>
@@ -144,10 +146,10 @@ export default function PreventionGuides({ lang }: PreventionGuidesProps) {
                   {/* TOPIC 3: Prevention methods */}
                   <div className="bg-white p-4.5 rounded-xl border border-slate-200/80 shadow-2xs space-y-2 flex flex-col justify-between">
                     <div>
-                      <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest block font-mono mb-1.5">
+                      <span className="text-xs md:text-sm font-extrabold text-emerald-600 tracking-tight block mb-1.5">
                         {lang === 'th' ? '3. วิธีป้องกันตนเองและครอบครัว' : '3. Prevention Methods'}
                       </span>
-                      <p className="text-xs md:text-[13px] text-slate-800 leading-relaxed font-bold">
+                      <p className="text-xs md:text-[13px] text-slate-700 leading-relaxed font-medium">
                         {lang === 'th' ? selectedGuide.prevention_th : selectedGuide.prevention_en}
                       </p>
                     </div>
@@ -156,10 +158,10 @@ export default function PreventionGuides({ lang }: PreventionGuidesProps) {
                   {/* TOPIC 4: Handling/Treatment methods */}
                   <div className="bg-white p-4.5 rounded-xl border border-slate-200/80 shadow-2xs space-y-2 flex flex-col justify-between">
                     <div>
-                      <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest block font-mono mb-1.5">
+                      <span className="text-xs md:text-sm font-extrabold text-amber-600 tracking-tight block mb-1.5">
                         {lang === 'th' ? '4. วิธีรับมือและการดูแลรักษาเบื้องต้น' : '4. Handling & Treatment'}
                       </span>
-                      <p className="text-xs md:text-[13px] text-slate-800 leading-relaxed font-bold">
+                      <p className="text-xs md:text-[13px] text-slate-700 leading-relaxed font-medium">
                         {lang === 'th' ? selectedGuide.whatToDo_th : selectedGuide.whatToDo_en}
                       </p>
                     </div>

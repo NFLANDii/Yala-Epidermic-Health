@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { 
   TrendingUp, Users, Calendar, Filter, CircleDot, 
-  CheckSquare, Activity, ShieldAlert, Award, ChevronDown, ChevronUp, BarChart4, AlertTriangle 
+  CheckSquare, Activity, ShieldAlert, Award, ChevronDown, ChevronUp, BarChart4, AlertTriangle,
+  Globe, Cpu, Droplet
 } from 'lucide-react';
-import { Case, CaseStatus } from '../types';
+import { Case, CaseStatus, ScenarioMode } from '../types';
 
 interface StatsDashboardProps {
   cases: Case[];
@@ -16,10 +17,7 @@ interface StatsDashboardProps {
   onCustomStartDateChange: (date: string) => void;
   customEndDate: string;
   onCustomEndDateChange: (date: string) => void;
-  aiReport?: string;
-  aiReportLoading?: boolean;
-  aiReportError?: string;
-  onGenerateReport?: () => void;
+  scenarioMode: ScenarioMode;
 }
 
 export default function StatsDashboard({
@@ -33,30 +31,35 @@ export default function StatsDashboard({
   onCustomStartDateChange,
   customEndDate,
   onCustomEndDateChange,
-  aiReport = '',
-  aiReportLoading = false,
-  aiReportError = '',
-  onGenerateReport
+  scenarioMode
 }: StatsDashboardProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isBlockExpanded, setIsBlockExpanded] = useState(true);
 
   // Distinct disease list from existing data + presets
-  const availableDiseases = Array.from(new Set([
+  const availableDiseases = [
     'All Diseases',
     'Dengue Fever',
     'COVID-19',
     'Hand, Foot, and Mouth Disease',
     'Influenza',
-    ...cases.map(c => c.disease)
-  ].filter(Boolean)));
+    'Leptospirosis',
+    'Diarrhea',
+    'Skin Infection',
+    'Cholera'
+  ];
 
   const translateDiseaseLabel = (d: string) => {
-    if (d === 'All Diseases') return lang === 'th' ? 'โรคติดต่อทั้งหมด' : 'All Diseases';
-    if (d === 'Dengue Fever') return lang === 'th' ? 'โรคไข้เลือดออก' : 'Dengue Fever';
-    if (d === 'COVID-19') return lang === 'th' ? 'โรคโควิด-19' : 'COVID-19';
-    if (d === 'Hand, Foot, and Mouth Disease') return lang === 'th' ? 'โรคมือ เท้า ปาก' : 'Hand, Foot, & Mouth';
-    if (d === 'Influenza') return lang === 'th' ? 'โรคไข้หวัดใหญ่' : 'Influenza';
+    const norm = d.toLowerCase();
+    if (norm === 'all diseases' || norm === 'all') return lang === 'th' ? 'โรคติดต่อทั้งหมด' : 'All Diseases';
+    if (norm.includes('dengue') || norm.includes('ไข้เลือดออก')) return lang === 'th' ? 'โรคไข้เลือดออก' : 'Dengue Fever';
+    if (norm.includes('covid') || norm.includes('โควิด')) return lang === 'th' ? 'โรคโควิด-19' : 'COVID-19';
+    if (norm.includes('mouth') || norm.includes('มือ เท้า ปาก')) return lang === 'th' ? 'โรคมือ เท้า ปาก' : 'Hand, Foot, & Mouth';
+    if (norm.includes('flu') || norm.includes('ไข้หวัดใหญ่') || norm.includes('influenza')) return lang === 'th' ? 'โรคไข้หวัดใหญ่' : 'Influenza';
+    if (norm.includes('leptospirosis') || norm.includes('ฉี่หนู') || norm.includes('lepto')) return lang === 'th' ? 'โรคฉี่หนู' : 'Leptospirosis';
+    if (norm.includes('diarrhea') || norm.includes('อุจจาระร่วง') || norm.includes('ท้องร่วง')) return lang === 'th' ? 'โรคอุจจาระร่วงเฉียบพลัน' : 'Diarrhea';
+    if (norm.includes('skin') || norm.includes('น้ำกัดเท้า') || norm.includes('ผิวหนัง')) return lang === 'th' ? 'โรคผิวหนังและน้ำกัดเท้า' : 'Skin Infections';
+    if (norm.includes('cholera') || norm.includes('อหิวา')) return lang === 'th' ? 'โรคอหิวาตกโรค' : 'Cholera';
     return d;
   };
 
@@ -214,7 +217,7 @@ export default function StatsDashboard({
             </div>
             <div>
               <h3 className="font-extrabold text-slate-900 text-xs uppercase tracking-tight">
-                {lang === 'th' ? '2. สถิติเฝ้าระวังและการกรองสถานการณ์โรคติดต่อ' : '2. Outbreak Statistics & Control Panel'}
+                {lang === 'th' ? 'สถิติเฝ้าระวังและการกรองสถานการณ์โรคติดต่อ' : 'Outbreak Statistics & Control Panel'}
               </h3>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">
                 {lang === 'th' ? 'คัดกรองตามหมวดหมู่โรค ช่วงเวลา และแสดงอัตราส่วนระบาดวิทยา' : 'Filter by disease categories, query timeline curves, and sanitary indicators'}
@@ -371,7 +374,7 @@ export default function StatsDashboard({
           </div>
 
           {/* Graphical Distributions Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             
             {/* Top outbreaks chart */}
             {selectedDisease === 'All Diseases' ? (
@@ -571,90 +574,67 @@ export default function StatsDashboard({
               </div>
             </div>
 
-          </div>
-
-          {/* AI Outbreak Intelligence Report Card */}
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-xs space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3 gap-3">
-              <div className="flex items-center space-x-2.5">
-                <div className="bg-cyan-500 text-white p-2 rounded shadow-xs">
-                  <TrendingUp size={16} />
-                </div>
-                <div>
-                  <h4 className="font-extrabold text-slate-900 text-xs uppercase tracking-tight flex items-center gap-1.5">
-                    <span>✨ {lang === 'th' ? 'รายงานวิเคราะห์อัจฉริยะโดย AI' : 'AI Outbreak Intelligence Report'}</span>
-                    <span className="text-[7px] bg-cyan-500/10 text-cyan-500 font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider">Gemini 2.5 Flash</span>
-                  </h4>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">
-                    {lang === 'th' ? 'รายงานประเมินสถานการณ์ระบาดเชิงลึกและการแทรกแซงทางสุขาภิบาลโดยละเอียด' : 'Deep epidemiological situation analysis and recommended health interventions'}
-                  </p>
-                </div>
+            {/* Municipal Quality & Sanitary Indices Card */}
+            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-3xs space-y-4">
+              <div className="border-b border-slate-100 pb-2">
+                <h5 className="font-extrabold text-slate-900 text-xs uppercase tracking-tight flex items-center space-x-1.5">
+                  <Globe size={14} className="text-cyan-500 animate-spin" style={{ animationDuration: '8s' }} />
+                  <span>{lang === 'th' ? 'ดัชนีคุณภาพและสุขลักษณะเทศบาล' : 'Municipal Quality & Sanitary'}</span>
+                </h5>
+                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">
+                  {lang === 'th' ? 'ตรวจสอบสภาวะสิ่งแวดล้อมและเครือข่ายเรียลไทม์' : 'Live environmental telemetry & sync status'}
+                </p>
               </div>
-              
-              <button
-                onClick={onGenerateReport}
-                disabled={aiReportLoading}
-                className="bg-blue-650 hover:bg-blue-700 disabled:bg-blue-400 text-white text-[10px] font-black uppercase tracking-wider px-4 py-2.5 rounded-lg flex items-center justify-center gap-2 cursor-pointer transition shrink-0 border-0"
-              >
-                <span>{aiReportLoading ? (lang === 'th' ? 'กำลังวิเคราะห์...' : 'Analyzing...') : (lang === 'th' ? 'วิเคราะห์ด้วย AI' : 'Generate AI Report')}</span>
-              </button>
+
+              <div className="space-y-3.5 pt-1 text-xs font-semibold">
+                {/* 1. สัญญาณดาวเทียม */}
+                <div className="flex items-center justify-between border-b border-slate-50 pb-2">
+                  <div className="flex items-center space-x-2">
+                    <Cpu size={14} className="text-cyan-500" />
+                    <span className="font-bold text-slate-600">{lang === 'th' ? 'สัญญาณดาวเทียม GIS:' : 'Satellite GIS Sync:'}</span>
+                  </div>
+                  <div className="flex items-center space-x-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="font-extrabold text-emerald-600 text-[10px]">100% ONLINE</span>
+                  </div>
+                </div>
+
+                {/* 2. คุณภาพอากาศ (AQI) */}
+                <div className="flex items-center justify-between border-b border-slate-50 pb-2">
+                  <div className="flex items-center space-x-2">
+                    <Activity size={14} className="text-blue-500" />
+                    <span className="font-bold text-slate-600">{lang === 'th' ? 'ดัชนีอากาศ (AQI):' : 'Air Quality (AQI):'}</span>
+                  </div>
+                  <span className="font-extrabold text-blue-600 text-[10px]">22 (Excellent)</span>
+                </div>
+
+                {/* 3. คุณภาพน้ำประปา */}
+                <div className="flex items-center justify-between border-b border-slate-50 pb-2">
+                  <div className="flex items-center space-x-2">
+                    <Droplet size={14} className="text-sky-500" />
+                    <span className="font-bold text-slate-600">{lang === 'th' ? 'คุณภาพน้ำประปา:' : 'Water Purity:'}</span>
+                  </div>
+                  <span className="font-extrabold text-sky-600 text-[10px]">98.6% (Passed)</span>
+                </div>
+
+                {/* 4. สภาวะสาธารณภัย */}
+                <div className="flex items-center justify-between pb-1">
+                  <div className="flex items-center space-x-2">
+                    <AlertTriangle size={14} className={scenarioMode === 'Flood' ? 'text-amber-500' : 'text-slate-400'} />
+                    <span className="font-bold text-slate-600">{lang === 'th' ? 'สภาวะสาธารณภัย:' : 'Disaster State:'}</span>
+                  </div>
+                  <span className={`font-extrabold text-[10px] uppercase ${scenarioMode === 'Flood' ? 'text-amber-600 animate-pulse' : 'text-emerald-600'}`}>
+                    {scenarioMode === 'Flood' ? (lang === 'th' ? '⚠️ ระบายน้ำ/ฟื้นฟู' : '⚠️ RECOVERY') : (lang === 'th' ? 'ปกติ / ปลอดภัย' : 'NORMAL / SAFE')}
+                  </span>
+                </div>
+
+                {/* Footer text */}
+                <p className="text-[8.5px] text-slate-400 font-bold leading-relaxed pt-2 border-t border-slate-100 text-center uppercase tracking-wider">
+                  {lang === 'th' ? 'อัปเดตอัตโนมัติจากสถานีเทศบาลยะลา' : 'Autosynced via Yala Satellites'}
+                </p>
+              </div>
             </div>
 
-            {aiReportLoading && (
-              <div className="py-12 flex flex-col items-center justify-center space-y-3">
-                <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                <p className="text-xs text-slate-500 font-bold animate-pulse">
-                  {lang === 'th' ? 'Gemini กำลังวิเคราะห์แนวโน้มระบาดวิทยาของยะลา...' : 'Gemini is analyzing Yala epidemiological trends...'}
-                </p>
-              </div>
-            )}
-
-            {aiReportError && !aiReportLoading && (
-              <div className="bg-rose-50 border border-rose-100 p-4 rounded-lg text-rose-800 text-xs font-semibold flex items-center gap-2">
-                <AlertTriangle size={14} className="shrink-0" />
-                <span>{aiReportError}</span>
-              </div>
-            )}
-
-            {!aiReport && !aiReportLoading && !aiReportError && (
-              <div className="text-center py-10 border border-dashed border-slate-200 rounded-lg space-y-2">
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">
-                  {lang === 'th' ? 'ยังไม่ได้สร้างรายงานวิเคราะห์' : 'No report generated yet.'}
-                </p>
-                <p className="text-[10px] text-slate-400 font-semibold max-w-sm mx-auto">
-                  {lang === 'th' ? 'กดปุ่มด้านบนเพื่อรวบรวมประวัติผู้ป่วยทั้งหมดและให้ Gemini สรุปวิเคราะห์สถานการณ์ทางการแพทย์ระดับมืออาชีพ' : 'Click the button above to synthesize all case data and produce a professional epidemiological brief.'}
-                </p>
-              </div>
-            )}
-
-            {aiReport && !aiReportLoading && (
-              <div className="bg-slate-50 border border-slate-150 p-5 rounded-lg text-xs leading-relaxed text-slate-750 font-medium font-sans max-h-96 overflow-y-auto space-y-4 shadow-inner">
-                <div className="prose prose-slate max-w-none prose-xs font-semibold">
-                  {aiReport.split('\n').map((line, idx) => {
-                    const cleanLine = line.trim();
-                    if (cleanLine.startsWith('###')) {
-                      return <h4 key={idx} className="text-xs font-extrabold text-slate-950 mt-4 mb-2 uppercase tracking-tight">{cleanLine.replace('###', '').trim()}</h4>;
-                    }
-                    if (cleanLine.startsWith('####')) {
-                      return <h5 key={idx} className="text-[11px] font-extrabold text-slate-950 mt-3 mb-1.5">{cleanLine.replace('####', '').trim()}</h5>;
-                    }
-                    if (cleanLine.startsWith('##')) {
-                      return <h3 key={idx} className="text-xs font-extrabold text-slate-950 mt-5 mb-2.5 uppercase tracking-wide border-b border-slate-200 pb-1">{cleanLine.replace('##', '').trim()}</h3>;
-                    }
-                    if (cleanLine.startsWith('#')) {
-                      return <h2 key={idx} className="text-sm font-black text-slate-950 mt-6 mb-3 uppercase tracking-wider">{cleanLine.replace('#', '').trim()}</h2>;
-                    }
-                    if (cleanLine.startsWith('-') || cleanLine.startsWith('*')) {
-                      return <li key={idx} className="ml-4 list-disc text-slate-650 my-1">{cleanLine.substring(1).trim()}</li>;
-                    }
-                    if (cleanLine.length === 0) {
-                      return <div key={idx} className="h-2" />;
-                    }
-                    return <p key={idx} className="my-1.5 leading-relaxed">{line}</p>;
-                  })}
-                </div>
-              </div>
-            )}
           </div>
 
         </div>

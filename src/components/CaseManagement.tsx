@@ -241,8 +241,8 @@ export default function CaseManagement({
                       <ArrowUpDown size={11} className="text-blue-600" />
                       <span>
                         {sortOrder === 'desc' 
-                          ? (lang === 'th' ? 'ล่าสุดไปก่อน' : 'Newest First')
-                          : (lang === 'th' ? 'ก่อนไปล่าสุด' : 'Oldest First')}
+                          ? (lang === 'th' ? 'ปัจจุบันไปย้อนหลัง' : 'Present to Past')
+                          : (lang === 'th' ? 'ย้อนหลังไปปัจจุบัน' : 'Past to Present')}
                       </span>
                     </button>
                   </div>
@@ -550,14 +550,13 @@ export default function CaseManagement({
                           className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:bg-white cursor-pointer"
                         >
                           <option value="Dengue Fever">{lang === 'th' ? 'โรคไข้เลือดออก (Dengue Fever)' : 'Dengue Fever'}</option>
-                          <option value="Leptospirosis">{lang === 'th' ? 'โรคฉี่หนู (Leptospirosis)' : 'Leptospirosis'}</option>
-                          <option value="Cholera">{lang === 'th' ? 'โรคอหิวาตกโรค (Cholera)' : 'Cholera'}</option>
-                          <option value="Diarrhea">{lang === 'th' ? 'โรคอุจจาระร่วงเฉียบพลัน (Diarrhea)' : 'Diarrhea'}</option>
-                          <option value="Skin Infection / Athlete's Foot">{lang === 'th' ? 'โรคผิวหนังอักเสบและน้ำกัดเท้า' : "Skin Infection / Athlete's Foot"}</option>
-                          <option value="Food Poisoning">{lang === 'th' ? 'โรคอาหารเป็นพิษ (Food Poisoning)' : 'Food Poisoning'}</option>
-                          <option value="Influenza">{lang === 'th' ? 'โรคไข้หวัดใหญ่ (Influenza)' : 'Influenza'}</option>
                           <option value="COVID-19">{lang === 'th' ? 'โรคโควิด-19 (COVID-19)' : 'COVID-19'}</option>
-                          <option value="Hand, Foot, and Mouth Disease">{lang === 'th' ? 'โรคมือ เท้า ปาก (Hand, Foot, & Mouth)' : 'Hand, Foot, & Mouth Disease'}</option>
+                          <option value="Hand, Foot, and Mouth Disease">{lang === 'th' ? 'โรคมือ เท้า ปาก (Hand, Foot, & Mouth)' : 'Hand, Foot, & Mouth'}</option>
+                          <option value="Influenza">{lang === 'th' ? 'โรคไข้หวัดใหญ่ (Influenza)' : 'Influenza'}</option>
+                          <option value="Leptospirosis">{lang === 'th' ? 'โรคฉี่หนู (Leptospirosis)' : 'Leptospirosis'}</option>
+                          <option value="Diarrhea">{lang === 'th' ? 'โรคอุจจาระร่วงเฉียบพลัน (Diarrhea)' : 'Diarrhea'}</option>
+                          <option value="Skin Infection">{lang === 'th' ? 'โรคผิวหนังและน้ำกัดเท้า (Skin Infection)' : 'Skin Infection'}</option>
+                          <option value="Cholera">{lang === 'th' ? 'โรคอหิวาตกโรค (Cholera)' : 'Cholera'}</option>
                         </select>
                       </div>
 

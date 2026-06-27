@@ -22,9 +22,48 @@ export const preventionData: BilingualDiseaseGuide[] = [
     symptoms_en: 'High fever (up to 104°F/40°C), severe headache, pain behind the eyes, joint and muscle aches, fatigue, nausea, vomiting, and skin rash.',
     prevention_th: 'ใช้หลัก 3 เก็บ (เก็บบ้าน เก็บขยะ เก็บน้ำ) เพื่อป้องกันยุงลาย: ปิดฝาภาชนะบรรจุน้ำให้มิดชิด เปลี่ยนน้ำในแจกันทุกสัปดาห์ ปล่อยปลากินลูกน้ำ ทายากันยุง นอนในมุ้ง และสนับสนุนเทศบาลในการพ่นหมอกควันกำจัดยุง',
     prevention_en: 'Eliminate stagnant water in pots, tires, and jars. Cover water storage containers. Use mosquito repellents and mosquito nets. Support municipality chemical misting (fogging) schedules.',
-    whatToDo_th: 'ดื่มน้ำหรือน้ำเกลือแร่บ่อยๆ ทานยาพาราเซตามอลเพื่อลดไข้ (ห้ามทานยาแอสไพรินหรือไอบูโพรเฟนเด็ดขาดเพราะอาจทำให้เลือดออกภายในรุนแรงขึ้น) หากมีอาการเตือนภัย เช่น ปวดท้องรุนแรง อาเจียนบ่อย เลือบออกตามไรฟัน ซึมกระสับกระส่าย ให้รีบไปโรงพยาบาลยะลาทันที',
+    whatToDo_th: 'ดื่มน้ำหรือน้ำเกลือแร่บ่อยๆ ทานยาพาราเซตามอลเพื่อลดไข้ (ห้ามทานยาแอสไพรินหรือไอบูโพรเฟนเด็ดขาดเพราะอาจทำให้เลือดออกภายในรุนแรงขึ้น) หากมีอาการเตือนภัย เช่น ปวดท้องรุนแรง อาเจียนบ่อย เลือดออกตามไรฟัน ซึมกระสับกระส่าย ให้รีบไปโรงพยาบาลยะลาทันที',
     whatToDo_en: 'Drink plenty of oral rehydration fluids. Take paracetamol for fever (AVOID aspirin or ibuprofen as they can worsen bleeding). If warning signs appear (severe abdominal pain, persistent vomiting, bleeding gums, fatigue), seek immediate care at Yala Hospital.',
     icon: 'ShieldAlert'
+  },
+  {
+    disease_th: 'โรคโควิด-19',
+    disease_en: 'COVID-19',
+    cause_th: 'ติดต่อทางระบบทางเดินหายใจ ผ่านการสูดดมละอองฝอยน้ำมูก น้ำลาย หรือการสัมผัสพื้นผิวที่ปนเปื้อนเชื้อไวรัส SARS-CoV-2 แล้วนำมาสัมผัสตา จมูก หรือปาก',
+    cause_en: 'Transmission via respiratory droplets from coughs, sneezes, or touching contaminated surfaces and then touching eyes, nose, or mouth.',
+    symptoms_th: 'มีไข้, ไอแห้ง, เจ็บคอ, สูญเสียการรับรสหรือกลิ่น, อ่อนเพลีย, หายใจเหนื่อยหอบ ในรายที่รุนแรงอาจเกิดปอดอักเสบ',
+    symptoms_en: 'Fever, dry cough, sore throat, loss of taste or smell, fatigue, and difficulty breathing. Severe cases can progress to pneumonia.',
+    prevention_th: 'สวมหน้ากากอนามัยในพื้นที่ปิดหรือแออัด ล้างมือบ่อยๆ ด้วยสบู่หรือเจลแอลกอฮอล์ รักษาระยะห่าง และฉีดวัคซีนป้องกันตามเกณฑ์',
+    prevention_en: 'Wear masks in indoor/crowded settings, practice frequent hand sanitization, maintain physical distancing, and stay up to date with vaccines.',
+    whatToDo_th: 'กักตัวแยกจากผู้อื่น สังเกตอาการตนเอง ดื่มน้ำมากๆ ทานยาลดไข้ตามอาการ หากมีอาการแน่นหน้าอกหรือหายใจลำบาก ให้รีบติดต่อโรงพยาบาลยะลา',
+    whatToDo_en: 'Isolate from others, monitor symptoms, drink fluids, take paracetamol for fever. Seek emergency medical care if experiencing severe chest tightness or difficulty breathing.',
+    icon: 'Activity'
+  },
+  {
+    disease_th: 'โรคมือ เท้า ปาก',
+    disease_en: 'Hand, Foot, and Mouth Disease',
+    cause_th: 'เกิดจากเชื้อกลุ่มเอนเทอโรไวรัส พบบ่อยในเด็กเล็ก ติดต่อผ่านการสัมผัสโดยตรงกับน้ำมูก น้ำลาย น้ำจากตุ่มพอง หรืออุจจาระของผู้ป่วย',
+    cause_en: 'Caused by enteroviruses, highly contagious among young children. Spreads through direct contact with saliva, nasal discharge, fluid from blisters, or stool.',
+    symptoms_th: 'มีไข้ต่ำๆ, เจ็บปาก, มีตุ่มแดงหรือตุ่มน้ำใสขึ้นที่เยื่อบุช่องปาก ลิ้น เหงือก กระพุ้งแก้ม และฝ่ามือ ฝ่าเท้า ก้น',
+    symptoms_en: 'Fever, sore throat, painful red blisters on the tongue, gums, inside of cheeks, and flat red spots on palms, soles of feet, or buttocks.',
+    prevention_th: 'ล้างมือให้สะอาดก่อนเตรียมอาหารและหลังขับถ่าย ทำความสะอาดของเล่นและเครื่องใช้ในโรงเรียนหรือศูนย์เด็กเล็กสม่ำเสมอ หลีกเลี่ยงการใช้สิ่งของร่วมกัน',
+    prevention_en: 'Wash hands with soap thoroughly before eating and after toilet use. Clean shared toys and school utensils regularly. Avoid sharing personal cups or towels.',
+    whatToDo_th: 'ให้เด็กหยุดเรียนเพื่อป้องกันการระบาด ทานอาหารอ่อนและเย็นเพื่อลดอาการเจ็บแผลในปาก ทานยาลดไข้ หากมีอาการซึม อาเจียนบ่อย หรือสะดุ้งผวา ให้รีบส่งแพทย์',
+    whatToDo_en: 'Isolate the child from school or daycare. Offer soft, cool foods to soothe mouth sores. If signs of high fever, persistent vomiting, or rapid muscle jerking appear, seek emergency clinical care.',
+    icon: 'Smile'
+  },
+  {
+    disease_th: 'โรคไข้หวัดใหญ่',
+    disease_en: 'Influenza',
+    cause_th: 'ติดต่อผ่านละอองฝอยจากการไอ จาม หรือพูดคุยของร่วมกันกับผู้ติดเชื้อไวรัสไข้หวัดใหญ่ (Influenza virus type A or B)',
+    cause_en: 'Spreads easily through respiratory droplets projected by coughing, sneezing, or close conversation with infected persons.',
+    symptoms_th: 'ไข้สูงเฉียบพลัน, หนาวสั่น, ปวดศีรษะ, ปวดเมื่อยตามกล้ามเนื้อและข้อต่ออย่างรุนแรง, อ่อนเพลียมาก, ไอแห้ง, เจ็บคอ, และมีน้ำมูก',
+    symptoms_en: 'Sudden onset of high fever, chills, severe muscle or body aches, headache, extreme fatigue, dry cough, sore throat, and runny nose.',
+    prevention_th: 'ฉีดวัคซีนไข้หวัดใหญ่ประจำปี หลีกเลี่ยงการใกล้ชิดกับผู้มีอาการป่วย ใช้ช้อนกลางเมื่อรับประทานอาหารร่วมกัน และล้างมือบ่อยๆ',
+    prevention_en: 'Receive annual influenza vaccination. Avoid close contact with sick individuals. Practice good respiratory hygiene, cover coughs, and clean hands frequently.',
+    whatToDo_th: 'พักผ่อนให้เพียงพอ ดื่มน้ำอุ่นมากๆ ทานยาลดไข้พาราเซตามอล หลีกเลี่ยงการซื้อยาชุดทานเอง กลุ่มเสี่ยง (ผู้สูงอายุ ผู้มีโรคประจำตัว) ควรพบแพทย์ทันทีเพื่อรับยาต้านไวรัส',
+    whatToDo_en: 'Get plenty of rest, drink warm fluids, and use paracetamol for fever. High-risk groups (elderly, chronic illness patients) should seek early medical care for antiviral prescription.',
+    icon: 'Thermometer'
   },
   {
     disease_th: 'โรคฉี่หนู',
@@ -34,23 +73,10 @@ export const preventionData: BilingualDiseaseGuide[] = [
     symptoms_th: 'ไข้สูงหนาวสั่นเฉียบพลัน, ปวดศีรษะรุนแรง, ปวดกล้ามเนื้ออย่างรุนแรงโดยเฉพาะที่น่องและโคนขา, ตาแดงกระตุก, คลื่นไส้, และอาจเกิดภาวะแทรกซ้อนรุนแรง เช่น ตัวเหลือง ตาเหลือง (ดีซ่าน) หรือไตวายเฉียบพลัน',
     symptoms_en: 'Sudden high fever, chills, severe headache, intense muscle aches (especially in calves and lower back), red eyes (conjunctival suffusion), vomiting, diarrhea, jaundice (yellow skin/eyes), and potential kidney failure.',
     prevention_th: 'หลีกเลี่ยงการเดินลุยน้ำท่วมขังหรือโคลนด้วยเท้าเปล่า หากจำเป็นต้องเดินลุยน้ำให้สวมรองเท้าบูทยางทุกครั้ง ล้างทำความสะอาดมือและเท้าด้วยสบู่ทันทีหลังจากขึ้นจากน้ำ ควบคุมและกำจัดหนูในบริเวณที่อยู่อาศัย ปิดฝาอาหารและน้ำดื่มให้มิดชิด',
-    prevention_en: 'Avoid wading in stagnant floodwaters, mud, or sewage barefoot. Always wear high rubber boots if water contact is unavoidable. Wash hands and limbs thoroughly with soap immediately. Keep food covered and exterminate rodents.',
+    prevention_en: 'Avoid wading in stagnant floodwaters, mud, or sewage barefoot. Always wear high rubber boots if water contact is unavailable. Wash hands and limbs thoroughly with soap immediately. Keep food covered and exterminate rodents.',
     whatToDo_th: 'หากมีไข้สูงเฉียบพลันหลังจากแช่น้ำลุยโคลนภายใน 1-2 สัปดาห์ ให้รีบไปพบแพทย์ที่โรงพยาบาลหรืออนามัยเทศบาลนครยะลาทันที แจ้งประวัติการแช่น้ำลุยโคลนให้ละเอียดเพื่อรับยาปฏิชีวนะประคองอาการตั้งแต่ระยะเริ่มต้น',
     whatToDo_en: 'If high fever or severe calf pain develops within 1-2 weeks after wading in floodwaters, seek urgent medical treatment at Yala Hospital. Disclose exposure history to receive early antibiotic therapy.',
     icon: 'Droplet'
-  },
-  {
-    disease_th: 'โรคอหิวาตกโรค',
-    disease_en: 'Cholera',
-    cause_th: 'ติดต่อจากการรับประทานอาหารหรือน้ำดื่มที่ปนเปื้อนเชื้อแบคทีเรีย Vibrio cholerae ซึ่งมักระบาดได้ง่ายขึ้นในสภาวะน้ำท่วมขังเนื่องจากระบบสุขาภิบาลและระบบกรองน้ำถูกทำลาย',
-    cause_en: 'Ingestion of food or water contaminated with Vibrio cholerae. Easily spreads during floods when clean water supplies and sanitation infrastructure are compromised.',
-    symptoms_th: 'อุจจาระร่วงรุนแรง ถ่ายเป็นน้ำปริมาณมากคล้ายน้ำซาวข้าวโดยไม่มีอาการปวดท้อง, อาเจียนบ่อย, ตะคริวตามเนื้อตัว, อ่อนเพลียอย่างรุนแรงเนื่องจากการสูญเสียน้ำและเกลือแร่อย่างรวดเร็ว ซึ่งเป็นอันตรายถึงชีวิต',
-    symptoms_en: 'Profuse painless watery diarrhea (often described as "rice-water stools"), rapid dehydration, severe vomiting, muscle cramps, and extreme lethargy, leading to hypovolemic shock if untreated.',
-    prevention_th: 'ดื่มน้ำสะอาดบรรจุขวดที่ผ่านการฆ่าเชื้อหรือน้ำต้มสุกเท่านั้น รับประทานอาหารที่ปรุงสุกใหม่ๆ ร้อนๆ ล้างมือให้สะอาดก่อนรับประทานอาหารและหลังขับถ่ายทุกครั้ง หลีกเลี่ยงผักสดปนเปื้อนน้ำท่วมขัง',
-    prevention_en: 'Drink only bottled or boiled water. Consume freshly cooked hot foods. Avoid raw vegetables or food rinsed in floodwaters. Practice meticulous handwashing with soap.',
-    whatToDo_th: 'ละลายผงเกลือแร่ (ORS) ดื่มในปริมาณมากๆ เพื่อทดแทนน้ำที่เสียไป หากอาการถ่ายร่วงไม่ทุเลา หรือมีภาวะช็อก ตากระตุก ตัวเย็น ขาดน้ำรุนแรง ให้ประคองผู้ป่วยส่งแผนกฉุกเฉินโรงพยาบาลยะลาทันทีเพื่อรับน้ำเกลือทางหลอดเลือดดำ',
-    whatToDo_en: 'Initiate oral rehydration solution (ORS) immediately. If severe diarrhea persists, or signs of shock (cold skin, sunken eyes, rapid pulse) appear, transport the patient to Yala Hospital emergency room for IV fluids.',
-    icon: 'Flame'
   },
   {
     disease_th: 'โรคอุจจาระร่วงเฉียบพลัน',
@@ -66,8 +92,8 @@ export const preventionData: BilingualDiseaseGuide[] = [
     icon: 'ShieldAlert'
   },
   {
-    disease_th: 'โรคผิวหนังอักเสบและน้ำกัดเท้า',
-    disease_en: 'Skin Infection / Athlete\'s Foot',
+    disease_th: 'โรคผิวหนังและน้ำกัดเท้า',
+    disease_en: 'Skin Infection',
     cause_th: 'เกิดจากการที่ผิวหนังเท้าสัมผัสสิ่งสกปรกและอับชื้นในน้ำท่วมขังเป็นเวลานานจนเกิดแผลเปื่อย ตามด้วยการติดเชื้อราหรือเชื้อแบคทีเรียแทรกซ้อนตามซอกนิ้วเท้า',
     cause_en: 'Prolonged exposure of skin to floodwater, mud, and continuous dampness causing maceration, followed by secondary fungal (Tinea) or bacterial infections.',
     symptoms_th: 'ผิวหนังซอกนิ้วเท้าเปื่อย แดง คัน อักเสบ หากติดเชื้อแบคทีเรียแทรกซ้อนจะมีตุ่มหนอง มีกลิ่นเหม็น ปวดบวมแดง และอาจมีไข้ต่ำๆ',
@@ -76,20 +102,19 @@ export const preventionData: BilingualDiseaseGuide[] = [
     prevention_en: 'Keep feet clean and completely dry. If feet touch dirty water, wash with soap immediately and dry with a clean cloth. Apply antifungal creams to susceptible toe clefts.',
     whatToDo_th: 'ทายาฆ่าเชื้อราหรือขี้ผึ้งรักษาน้ำกัดเท้าสม่ำเสมอ หากมีตุ่มหนอง ปวด บวม แดง มีการอักเสบลุกลาม ให้ล้างทำความสะอาดแผลด้วยแอลกอฮอล์หรือเบตาดีน และไปพบแพทย์เพื่อพิจารณายาปฏิชีวนะชนิดกิน',
     whatToDo_en: 'Apply topical antifungal or antiseptic ointments regularly. If warm swelling, severe pain, or red streaks develop, disinfect with iodine and consult a physician for oral antibiotics.',
-    icon: 'Activity'
+    icon: 'Flame'
   },
   {
-    disease_th: 'โรคอาหารเป็นพิษ',
-    disease_en: 'Food Poisoning',
-    cause_th: 'เกิดจากการรับประทานอาหารที่ปนเปื้อนสารพิษของเชื้อแบคทีเรียหรือเชื้อจุลินทรีย์ที่เจริญเติบโตในอาหารที่บูดเสีย หรือเตรียมไม่ถูกสุขลักษณะ',
-    cause_en: 'Consumption of food contaminated with bacterial toxins (e.g., Staphylococcus aureus, Bacillus cereus) due to poor refrigeration or unsanitary handling.',
-    symptoms_th: 'คลื่นไส้ อาเจียนอย่างรุนแรงร่วมกับอาการปวดท้องเกร็ง ถ่ายอุจจาระเหลว มีไข้หนาวสั่น ปวดศีรษะ และกล้ามเนื้อล้า',
-    symptoms_en: 'Severe nausea, rapid onset of projectile vomiting, abdominal cramps, diarrhea, fever, headache, and generalized muscle weakness.',
-    prevention_th: 'เลือกรับประทานอาหารที่ปรุงสุกใหม่ๆ หลีกเลี่ยงอาหารค้างคืนที่ไม่ได้อุ่นร้อน ไม่รับประทานอาหารที่มีกลิ่น สี หรือรสชาติผิดปกติ ล้างภาชนะที่เตรียมอาหารให้สะอาดสะอ้านอยู่เสมอ',
-    prevention_en: 'Eat freshly prepared meals, heat leftovers thoroughly before eating, avoid food that has been stored at room temperature, and maintain strict kitchen hygiene.',
-    whatToDo_th: 'ดื่มน้ำและผงเกลือแร่ ORS ชดเชยการสูญเสียน้ำจากการอาเจียน พักผ่อนร่างกาย งดรับประทานอาหารที่มีไขมันสูง หากอาเจียนรุนแรงจนดื่มน้ำไม่ได้และมีไข้สูง ให้รีบไปรับการรักษาที่ศูนย์แพทย์สาธารณสุขเทศบาล',
-    whatToDo_en: 'Stay hydrated by sipping ORS solution or clear fluids. Rest your digestive system by eating bland food like crackers. Seek clinical care if vomiting prevents oral fluid intake.',
-    icon: 'Users'
+    disease_th: 'โรคอหิวาตกโรค',
+    disease_en: 'Cholera',
+    cause_th: 'ติดต่อจากการรับประทานอาหารหรือน้ำดื่มที่ปนเปื้อนเชื้อแบคทีเรีย Vibrio cholerae ซึ่งมักระบาดได้ง่ายขึ้นในสภาวะน้ำท่วมขังเนื่องจากระบบสุขาภิบาลและระบบกรองน้ำถูกทำลาย',
+    cause_en: 'Ingestion of food or water contaminated with Vibrio cholerae. Easily spreads during floods when clean water supplies and sanitation infrastructure are compromised.',
+    symptoms_th: 'อุจจาระร่วงรุนแรง ถ่ายเป็นน้ำปริมาณมากคล้ายน้ำซาวข้าวโดยไม่มีอาการปวดท้อง, อาเจียนบ่อย, ตะคริวตามเนื้อตัว, อ่อนเพลียอย่างรุนแรงเนื่องจากการสูญเสียน้ำและเกลือแร่อย่างรวดเร็ว ซึ่งเป็นอันตรายถึงชีวิต',
+    symptoms_en: 'Profuse painless watery diarrhea (often described as "rice-water stools"), rapid dehydration, severe vomiting, muscle cramps, and extreme lethargy, leading to hypovolemic shock if untreated.',
+    prevention_th: 'ดื่มน้ำสะอาดบรรจุขวดที่ผ่านการฆ่าเชื้อหรือน้ำต้มสุกเท่านั้น รับประทานอาหารที่ปรุงสุกใหม่ๆ ร้อนๆ ล้างมือให้สะอาดก่อนรับประทานอาหารและหลังขับถ่ายทุกครั้ง หลีกเลี่ยงผักสดปนเปื้อนน้ำท่วมขัง',
+    prevention_en: 'Drink only bottled or boiled water. Consume freshly cooked hot foods. Avoid raw vegetables or food rinsed in floodwaters. Practice meticulous handwashing with soap.',
+    whatToDo_th: 'ละลายผงเกลือแร่ (ORS) ดื่มในปริมาณมากๆ เพื่อทดแทนน้ำที่เสียไป หากอาการถ่ายร่วงไม่ทุเลา หรือมีภาวะช็อก ตากระตุก ตัวเย็น ขาดน้ำรุนแรง ให้ประคองผู้ป่วยส่งแผนกฉุกเฉินโรงพยาบาลยะลาทันทีเพื่อรับน้ำเกลือทางหลอดเลือดดำ',
+    whatToDo_en: 'Initiate oral rehydration solution (ORS) immediately. If severe diarrhea persists, or signs of shock (cold skin, sunken eyes, rapid pulse) appear, transport the patient to Yala Hospital emergency room for IV fluids.',
+    icon: 'Droplet'
   }
 ];
-
